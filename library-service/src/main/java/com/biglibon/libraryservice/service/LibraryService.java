@@ -1,56 +1,84 @@
 package com.biglibon.libraryservice.service;
 
 import com.biglibon.libraryservice.client.BookServiceClient;
-import com.biglibon.libraryservice.dto.AddBookRequest;
+import com.biglibon.libraryservice.dto.AddBooksToLibraryByIdsRequestDto;
 import com.biglibon.libraryservice.exception.LibraryNotFoundException;
+import com.biglibon.libraryservice.mapper.LibraryMapper;
 import com.biglibon.libraryservice.model.Library;
 import com.biglibon.libraryservice.dto.LibraryDto;
 import com.biglibon.libraryservice.repository.LibraryRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class LibraryService {
 
     private final LibraryRepository repository;
     private final BookServiceClient bookServiceClient;
+    private final LibraryMapper libraryMapper;
 
-    public LibraryService(LibraryRepository repository, BookServiceClient bookServiceClient) {
+    public LibraryService(LibraryRepository repository, BookServiceClient bookServiceClient, LibraryMapper libraryMapper) {
         this.repository = repository;
         this.bookServiceClient = bookServiceClient;
-    }
-
-    public LibraryDto findAllBooksInLibraryById(String id) {
-        Library library = repository.findById(id)
-                .orElseThrow(() -> new LibraryNotFoundException("Library could not found by id:" + id));
-
-        return new LibraryDto(
-                library.getId(),
-                library.getUserBook().stream()
-                        .map(bookServiceClient::getById) // feign client
-                        .map(ResponseEntity::getBody)
-                        .collect(Collectors.toList()));
+        this.libraryMapper = libraryMapper;
     }
 
     public LibraryDto create() {
-        Library newLibrary = repository.save(new Library());
-        return new LibraryDto(newLibrary.getId());
+        return libraryMapper.toDto(repository.save(new Library()), bookServiceClient);
     }
 
-    public void addBookToLibrary(AddBookRequest addBookRequest) {
-        String bookId = bookServiceClient.getByIsbn(addBookRequest.getIsbn()).getBody().getId();
-        Library library = repository.findById(addBookRequest.getLibraryId())
-                .orElseThrow(() -> new LibraryNotFoundException("Library could not found by id:" + addBookRequest.getLibraryId()));
-        library.getUserBook().add(bookId);
+    public List<LibraryDto> findAll() {
+        return libraryMapper.toDtoList(repository.findAll(), bookServiceClient);
+    }
+
+    public void addBooksToLibraryByIds(AddBooksToLibraryByIdsRequestDto addBooksToLibraryByIdsRequestDto) {
+        Library library = repository.findById(addBooksToLibraryByIdsRequestDto.libraryId())
+                .orElseThrow(() -> new LibraryNotFoundException("Library not found"));
+        addBooksToLibraryByIdsRequestDto.bookId().forEach(bookId -> {
+            if (!library.getBookIds().contains(bookId)) {
+                library.getBookIds().add(bookId);
+            }
+        });
         repository.save(library);
     }
 
-    public List<String> findAllLibraryIds() {
-        return repository.findAll().stream()
-                .map(Library::getId)
-                .collect(Collectors.toList());
+    public LibraryDto findWithBooksById(Long id) {
+        Library library = repository.findById(id)
+                .orElseThrow(() -> new LibraryNotFoundException("Library could not found by id:" + id));
+        return libraryMapper.toDto(library, bookServiceClient);
     }
+
+
+//    public void addBookToLibraryByIsbn(AddBookRequestDto addBookRequestDto) {
+//        String isbn = bookServiceClient.getByIsbn(addBookRequestDto.isbn()).getBody().isbn();
+//        Library library = repository.findById(addBookRequestDto.libraryId())
+//                .orElseThrow(() -> new LibraryNotFoundException("Library could not found by id:" + addBookRequestDto.libraryId()));
+//        library.getBooks().add(isbn);
+//        repository.save(library);
+//    }
+
+
+//    public LibraryDto findAllBooksInLibraryById(Long id) {
+//        Library library = repository.findById(id)
+//                .orElseThrow(() -> new LibraryNotFoundException("Library could not found by id:" + id));
+//        library.getBooks()
+//                .forEach(isbn -> bookServiceClient.getByIsbn(isbn).getBody());
+//
+//
+//        List<String> isbnList = library.getBooks();
+//        List<BookDto> bookDtos = new ArrayList<>();
+//
+//        for (String isbn : isbnList) {
+//            bookDtos.add(bookServiceClient.getByIsbn(isbn).getBody());
+//        }
+//
+//
+//        return new LibraryDto(id, bookDtos);
+//    }
+//
+
+
 }
