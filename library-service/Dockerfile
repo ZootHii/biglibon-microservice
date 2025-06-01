@@ -1,27 +1,32 @@
 # Use official Java runtime as base image
-FROM eclipse-temurin:17-jdk-alpine AS builder
+#FROM maven:3.9.6-eclipse-temurin-17 AS builder
 
 # Set working directory inside the container
-WORKDIR library-service
+#WORKDIR api-gateway
 
 # Copy Maven dependencies first (for caching)
-COPY pom.xml .
-RUN mvn dependency:go-offline
+#COPY pom.xml .
+#RUN mvn dependency:go-offline
 
 # Copy the entire project and build
-COPY . .
-RUN mvn clean package -DskipTests
+#COPY . .
+#RUN mvn clean package -DskipTests
 
 # Use a smaller image for running the app
-FROM eclipse-temurin:17-jre-alpine
+FROM maven:3.9.6-eclipse-temurin-17
 
 WORKDIR library-service
 
+#COPY . .
 # Copy only the built JAR from the previous stage
-COPY --from=builder /library-service/target/library-service.jar .
+#COPY --from=builder /api-gateway/target/api-gateway-0.0.1-SNAPSHOT.jar .
+COPY ./ .
+ADD target/library-service-0.0.1-SNAPSHOT.jar library-service-0.0.1-SNAPSHOT.jar
+
 
 # Expose the required port
-EXPOSE 4024
+EXPOSE 4025
 
 # Define entry point
-CMD ["java", "-jar", "library-service.jar"]
+ENTRYPOINT ["java", "-jar", "library-service-0.0.1-SNAPSHOT.jar"]
+CMD ["mvn", "spring-boot:run"]
