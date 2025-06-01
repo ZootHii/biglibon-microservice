@@ -1,0 +1,111 @@
+version: '3.9'
+
+services:
+  eureka-service:
+    image: 'biglibon-microservice-eureka-service:latest'
+    container_name: biglibon-microservice-eureka-service
+    build:
+      context: ./eureka-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "4024:4024"
+
+  api-gateway:
+    image: 'biglibon-microservice-api-gateway:latest'
+    container_name: biglibon-microservice-api-gateway
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "4024:4024"
+    depends_on:
+      - eureka-service
+
+  book-service:
+    image: 'biglibon-microservice-book-service:latest'
+    container_name: biglibon-microservice-book-service
+    build:
+      context: ./book-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "4024:4024"
+    depends_on:
+      - api-gateway
+      - mongodb
+
+  library-service:
+    image: 'biglibon-microservice-library-service:latest'
+    container_name: biglibon-microservice-library-service
+    build:
+      context: ./library-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "4024:4024"
+    depends_on:
+      - api-gateway
+      - postgresqldb
+
+  postgresqldb:
+    platform: linux/amd64
+    image: postgres:17.5-alpine
+    container_name: postgresqldb
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=biglibon
+      - POSTGRES_PASSWORD=biglibon
+      - POSTGRES_DB=biglibon
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mongodb:
+    platform: linux/amd64
+    image: mongo:8.0.9-nanoserver
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: biglibon
+      MONGO_INITDB_ROOT_PASSWORD: biglibon
+    volumes:
+      - mongo-data:/data/db
+
+  mongo-express:
+    platform: linux/amd64
+    image: mongo-express:1.0.2-20-alpine3.19
+    container_name: mongoui
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: biglibon
+      ME_CONFIG_MONGODB_ADMINPASSWORD: biglibon
+      ME_CONFIG_MONGODB_URL: mongodb
+    depends_on:
+      - mongodb
+
+  pgadmin:
+    platform: linux/amd64
+    image: dpage/pgadmin4:9.4.0
+    container_name: postgresqlui
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@biglibon.com
+      PGADMIN_DEFAULT_PASSWORD: biglibon
+    depends_on:
+      - postgresqldb
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+  mongo-data:
