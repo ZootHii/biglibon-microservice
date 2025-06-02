@@ -8,7 +8,6 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -23,16 +22,16 @@ public interface BookServiceClient {
     ResponseEntity<BookDto> getByIsbn(@PathVariable String isbn);
 
     default ResponseEntity<BookDto> getByIsbnFallback(String isbn, Exception exception) {
-        logger.info("Book not found by isbn: " + isbn + ", returning default BookDto object.");
+        logger.info("Book not found by isbn: {}, returning default BookDto object.", isbn);
         return ResponseEntity.ok(null);
     }
 
     @GetMapping("/by-ids/{ids}") // this will work with circuitBreaker before errorDecoder
     @CircuitBreaker(name = "getAllByIdsCircuitBreaker", fallbackMethod = "getAllByIdsFallback")
-    ResponseEntity<List<BookDto>> getAllByIds(@RequestParam List<Long> ids);
+    ResponseEntity<List<BookDto>> getAllByIds(@RequestParam List<String> ids);
 
-    default ResponseEntity<List<BookDto>> getAllByIdsFallback(List<Long> ids, Exception exception) {
-        logger.info("Books not found by ids: " + ids + ", returning default BookDto object.");
+    default ResponseEntity<List<BookDto>> getAllByIdsFallback(List<String> ids, Exception exception) {
+        logger.info("Books not found by ids: {}, returning default BookDto object.", ids);
         return ResponseEntity.ok(null);
     }
 
@@ -41,10 +40,10 @@ public interface BookServiceClient {
 
     @GetMapping("/id/{id}")
     @CircuitBreaker(name = "getByIdCircuitBreaker", fallbackMethod = "getByIdFallback")
-    ResponseEntity<BookDto> getById(@PathVariable Long id);
+    ResponseEntity<BookDto> getById(@PathVariable String id);
 
     default ResponseEntity<BookDto> getByIdFallback(String id, Exception exception) {
-        logger.info("Book not found by id: " + id + ", returning default BookDto object.");
+        logger.info("Book not found by id: {}, returning default BookDto object.", id);
         return ResponseEntity.ok(null);
     }
 }

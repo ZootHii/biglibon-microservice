@@ -20,5 +20,5 @@ public class Library {
     private long id;
 
     @ElementCollection
-    private List<Long> bookIds;
+    private List<String> bookIds;
 }

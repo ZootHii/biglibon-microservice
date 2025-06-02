@@ -1,7 +1,9 @@
 package com.biglibon.libraryservice.exception;
 
 import com.biglibon.libraryservice.client.ExceptionMessage;
+import lombok.Getter;
 
+@Getter
 public class BookNotFoundException extends RuntimeException {
 
     private ExceptionMessage exceptionMessage;
@@ -19,7 +21,4 @@ public class BookNotFoundException extends RuntimeException {
         this.exceptionMessage = exceptionMessage;
     }
 
-    public ExceptionMessage getExceptionMessage() {
-        return exceptionMessage;
-    }
 }

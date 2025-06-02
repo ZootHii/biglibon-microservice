@@ -26,12 +26,12 @@ public interface LibraryMapper {
 
     List<Library> toEntityList(List<LibraryDto> libraryDtoList);
 
-    default List<BookDto> mapBookIds(List<Long> bookIds, @Context BookServiceClient bookServiceClient) {
+    default List<BookDto> mapBookIds(List<String> bookIds, @Context BookServiceClient bookServiceClient) {
         return bookServiceClient.getAllByIds(bookIds).getBody();
     }
 
 
-//    default BookDto mapBookId(Long bookId, @Context BookServiceClient bookServiceClient) {
+//    default BookDto mapBookId(String bookId, @Context BookServiceClient bookServiceClient) {
 //        return bookServiceClient.getById(bookId).getBody();
 //    }
 
