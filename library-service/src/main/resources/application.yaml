@@ -25,7 +25,7 @@ eureka:
     prefer-ip-address: true
   client:
     service-url:
-      default-zone: http://localhost:8761/eureka # value will get overriden if passed from external config
+      defaultZone: http://localhost:8761/eureka # value will get overriden if passed from external config
 
 server:
   port: 0 # Random port assignment

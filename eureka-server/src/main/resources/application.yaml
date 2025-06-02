@@ -4,9 +4,10 @@ spring:
 
 eureka:
   instance:
+    prefer-ip-address: true
   client:
-    registerWithEureka: false
-    fetchRegistry: false
+    register-with-eureka: false
+    fetch-registry: false
 
 server:
   port: 8761

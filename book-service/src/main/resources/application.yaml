@@ -33,8 +33,9 @@ eureka:
   instance:
     prefer-ip-address: true
   client:
+    enabled: true
     service-url:
-      default-zone: http://localhost:8761/eureka # value will get overriden if passed from external config
+      defaultZone: http://localhost:8761/eureka # value will get overriden if passed from external config
 
 server:
   port: 0 # Random port assignment
@@ -52,3 +53,5 @@ management:
       exposure:
         include:
           - "*"
+
+spring.cloud.service-registry.auto-registration.enabled: true
