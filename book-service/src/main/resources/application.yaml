@@ -1,4 +1,7 @@
 spring:
+  cloud:
+    client:
+      hostname: book-service
   application:
     name: book-service
   data:
@@ -11,40 +14,27 @@ spring:
       authentication-database: admin
       auto-index-creation: true
   jpa:
-#    database: h2
-#    hibernate:
-#      ddl-auto: create-drop
     show-sql: true
-#    properties:
-#      hibarnate:
-##        dialect: org.hibernate.dialect.PostgreSQLDialect
-#        format_sql: true # Improves SQL readability
-#        use_sql_comments: true # Adds comments in logs
-#  datasource:
-#    url: jdbc:postgresql://localhost:5432/biglibon
-#    username: biglibon
-#    password: biglibon
-#  h2:
-#    console:
-#      enabled: true
-#      path: /h2-console
 
 eureka:
   instance:
-    prefer-ip-address: true
+    leaseRenewalIntervalInSeconds: 10   # Heartbeat check time
+    prefer-ip-address: true # overwrite on docker-compose as false
+    hostname: book-service # overwrite on docker-compose as book-service
+    instance-id: ${spring.application.name}:${hostname}:${server.port}
   client:
     enabled: true
+    register-with-eureka: true
+    fetch-registry: true
     service-url:
       defaultZone: http://localhost:8761/eureka # value will get overriden if passed from external config
 
 server:
-  port: 0 # Random port assignment
+  port: 0 # Random port assignment, overwrite on docker-compose as 8887, because can not open random port
 
 logging:
   level:
     root: INFO
-#    org.hibernate.SQL: DEBUG # Shows executed SQL queries
-#    org.hibernate.type.descriptor.sql: TRACE # Shows parameter bindings
     org.springframework.data.mongodb.core.MongoTemplate: DEBUG
 
 management:

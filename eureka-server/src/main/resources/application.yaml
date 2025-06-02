@@ -1,10 +1,12 @@
 spring:
+  cloud:
+    client:
+      hostname: eureka-server
   application:
     name: eureka-server
 
 eureka:
   instance:
-    prefer-ip-address: true
   client:
     register-with-eureka: false
     fetch-registry: false

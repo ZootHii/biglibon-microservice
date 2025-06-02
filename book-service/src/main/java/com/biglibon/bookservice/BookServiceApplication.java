@@ -1,11 +1,14 @@
 package com.biglibon.bookservice;
 
+import com.biglibon.bookservice.model.Book;
 import com.biglibon.bookservice.repository.BookRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+
+import java.util.List;
 
 @SpringBootApplication
 @EnableDiscoveryClient
@@ -25,12 +28,14 @@ public class BookServiceApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-//		Book book1 = new Book("Sineklerin Tanrısı", 1954, "William Golding", "Kültür Yayınları", "111");
-//		Book book2 = new Book("Hamlet", 1602, "William Shakespeare", "Ren Yayınları", "222");
-//		Book book3 = new Book("Cesur Yeni Dünya", 1932, "Aldous Huxley", "İthaki Yayınları", "333");
-//		Book book4 = new Book("Masumiyet Müzesi", 2008, "Orhan Pamuk", "YKY", "444");
+        if (bookRepository.findAll().isEmpty()) {
+            Book book1 = new Book("Sineklerin Tanrısı", 1954, "William Golding", "Kültür Yayınları", "111");
+            Book book2 = new Book("Hamlet", 1602, "William Shakespeare", "Ren Yayınları", "222");
+            Book book3 = new Book("Cesur Yeni Dünya", 1932, "Aldous Huxley", "İthaki Yayınları", "333");
+            Book book4 = new Book("Masumiyet Müzesi", 2008, "Orhan Pamuk", "YKY", "444");
 
-//		List<Book> books = bookRepository.saveAll(List.of(book1, book2, book3, book4));
-//		System.out.println(books);
+            List<Book> books = bookRepository.saveAll(List.of(book1, book2, book3, book4));
+            System.out.println(books);
+        }
     }
 }
