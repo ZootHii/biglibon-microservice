@@ -1,61 +1,71 @@
 version: '3.9'
 
 services:
-  eureka-server:
-    #platform: linux/arm64
-    image: 'biglibon-microservice-eureka-server:latest'
-    container_name: biglibon-microservice-eureka-server
-    build:
-      context: ./eureka-server
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    ports:
-      - "8761:8761"
+#  eureka-server:
+#    image: 'biglibon-microservice-eureka-server:latest'
+#    container_name: eureka-server
+#    build:
+#      context: ./eureka-server
+#      dockerfile: Dockerfile
+#    restart: unless-stopped
+#    ports:
+#      - "8761:8761"
+#    networks:
+#      - biglibon-network
+#
+#  api-gateway:
+#    image: 'biglibon-microservice-api-gateway:latest'
+#    container_name: api-gateway
+#    build:
+#      context: ./api-gateway
+#      dockerfile: Dockerfile
+#    restart: unless-stopped
+#    ports:
+#      - "8888:8888"
+#    depends_on:
+#      - eureka-server
+#    networks:
+#      - biglibon-network
+#    environment:
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+#
+#  book-service:
+#    image: 'biglibon-microservice-book-service:latest'
+#    container_name: book-service
+#    build:
+#      context: ./book-service
+#      dockerfile: Dockerfile
+#    restart: unless-stopped
+#    environment:
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+#    networks:
+#      - biglibon-network
+#    deploy:
+#      replicas: 1
+#    depends_on:
+#      - eureka-server
+#      - api-gateway
+#
+#  library-service:
+#    image: 'biglibon-microservice-library-service:latest'
+#    container_name: library-service
+#    build:
+#      context: ./library-service
+#      dockerfile: Dockerfile
+#    restart: unless-stopped
+#    environment:
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+#    networks:
+#      - biglibon-network
+#    deploy:
+#      replicas: 1
+#    depends_on:
+#      - eureka-server
+#      - api-gateway
 
-  api-gateway:
-    #platform: linux/arm64
-    image: 'biglibon-microservice-api-gateway:latest'
-    container_name: biglibon-microservice-api-gateway
-    build:
-      context: ./api-gateway
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    ports:
-      - "4025:4025"
-    depends_on:
-      - eureka-server
-
-  book-service:
-    #platform: linux/arm64
-    image: 'biglibon-microservice-book-service:latest'
-    container_name: biglibon-microservice-book-service
-    build:
-      context: ./book-service
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    ports:
-      - "4025:4025"
-    depends_on:
-      - api-gateway
-#      - mongodb
-
-  library-service:
-    #platform: linux/arm64
-    image: 'biglibon-microservice-library-service:latest'
-    container_name: biglibon-microservice-library-service
-    build:
-      context: ./library-service
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    ports:
-      - "4025:4025"
-    depends_on:
-      - api-gateway
-#      - postgresqldb
-
+######## Databases #######
 #  postgresqldb:
-   # platform: linux/arm64
-#    image: postgres #:17.5-alpine
+#    image: postgres
 #    container_name: postgresqldb
 #    ports:
 #      - "5432:5432"
@@ -67,39 +77,37 @@ services:
 #    volumes:
 #      - postgres_data:/var/lib/postgresql/data
 
-#  mongodb:
-  #  platform: linux/arm64
-#    image: mongo #:8.0.9-nanoserver
-#    container_name: mongodb
-#    ports:
-#      - "27017:27017"
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: biglibon
+      MONGO_INITDB_ROOT_PASSWORD: biglibon
+    volumes:
+      - mongo-data:/data/db
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongoui
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: biglibon
+      ME_CONFIG_MONGODB_ADMINPASSWORD: biglibon
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_URL: "mongodb://biglibon:biglibon@mongodb:27017/"
+    depends_on:
+      - mongodb
+
+#  pgadmin:
+#    image: dpage/pgadmin4
+#    container_name: postgresqlui
 #    restart: unless-stopped
-#    environment:
-#      MONGO_INITDB_ROOT_USERNAME: biglibon
-#      MONGO_INITDB_ROOT_PASSWORD: biglibon
-#    volumes:
-#      - mongo-data:/data/db
-
-##  mongo-express:
- #   platform: linux/arm64
-##    image: mongo-express #:1.0.2-18-alpine3.18
-##    container_name: mongoui
-##    restart: unless-stopped
-##    ports:
-##      - "8081:8081"
-##    environment:
-##      ME_CONFIG_MONGODB_ADMINUSERNAME: biglibon
-##      ME_CONFIG_MONGODB_ADMINPASSWORD: biglibon
-##      ME_CONFIG_MONGODB_URL: mongodb
-##    depends_on:
-##      - mongodb
-
-##  pgadmin:
-##    #platform: linux/amd64
-##    image: dpage/pgadmin4 #4:9.4.0
-##    container_name: postgresqlui
-##    restart: unless-stopped
-##    ports:
+#    ports:
 #      - "5050:80"
 #    environment:
 #      PGADMIN_DEFAULT_EMAIL: admin@biglibon.com
@@ -109,7 +117,12 @@ services:
 #    volumes:
 #      - pgadmin_data:/var/lib/pgadmin
 
-#volumes:
+####### Volumes #######
+volumes:
 #  postgres_data:
 #  pgadmin_data:
-#  mongo-data:
+  mongo-data:
+
+####### Networks #######
+networks:
+  biglibon-network:

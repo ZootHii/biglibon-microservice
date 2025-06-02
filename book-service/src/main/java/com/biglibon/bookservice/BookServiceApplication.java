@@ -1,21 +1,29 @@
 package com.biglibon.bookservice;
 
-import com.biglibon.bookservice.model.Book;
-import com.biglibon.bookservice.repository.BookRepository;
+import com.biglibon.bookservice.model.BookMongo;
+import com.biglibon.bookservice.repository.BookRepositoryMongo;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 import java.util.List;
 
 @SpringBootApplication
 @EnableDiscoveryClient
+@EnableMongoRepositories
 public class BookServiceApplication implements CommandLineRunner {
 
-	private final BookRepository bookRepository;
+//	private final BookRepository bookRepository;
+//
+//	public BookServiceApplication(BookRepository bookRepository) {
+//		this.bookRepository = bookRepository;
+//	}
 
-	public BookServiceApplication(BookRepository bookRepository) {
+	private final BookRepositoryMongo bookRepository;
+
+	public BookServiceApplication(BookRepositoryMongo bookRepository) {
 		this.bookRepository = bookRepository;
 	}
 
@@ -25,11 +33,22 @@ public class BookServiceApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		Book book1 = new Book("Sineklerin Tanrısı", 1954, "William Golding", "Kültür Yayınları", "111");
-		Book book2 = new Book("Hamlet", 1602, "William Shakespeare", "Ren Yayınları", "222");
-		Book book3 = new Book("Cesur Yeni Dünya", 1932, "Aldous Huxley", "İthaki Yayınları", "333");
 
-		List<Book> books = bookRepository.saveAll(List.of(book1, book2, book3));
-		System.out.println(books);
+//		BookMongo book1 = new BookMongo("Sineklerin Tanrısı", 1954, "William Golding", "Kültür Yayınları", "111");
+//		BookMongo book2 = new BookMongo("Hamlet", 1602, "William Shakespeare", "Ren Yayınları", "222");
+//		BookMongo book3 = new BookMongo("Cesur Yeni Dünya", 1932, "Aldous Huxley", "İthaki Yayınları", "333");
+//		BookMongo book4 = new BookMongo("Masumiyet Müzesi", 2008, "Orhan Pamuk", "YKY", "444");
+
+//		List<BookMongo> books = bookRepository.saveAll(List.of(book1, book2, book3, book4));
+//		System.out.println(books);
+
+//
+//		Book book1 = new Book("Sineklerin Tanrısı", 1954, "William Golding", "Kültür Yayınları", "111");
+//		Book book2 = new Book("Hamlet", 1602, "William Shakespeare", "Ren Yayınları", "222");
+//		Book book3 = new Book("Cesur Yeni Dünya", 1932, "Aldous Huxley", "İthaki Yayınları", "333");
+//		Book book4 = new Book("Masumiyet Müzesi", 2008, "Orhan Pamuk", "YKY", "444");
+//
+//		List<Book> books = bookRepository.saveAll(List.of(book1, book2, book3, book4));
+//		System.out.println(books);
 	}
 }
