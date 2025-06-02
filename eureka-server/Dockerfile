@@ -1,4 +1,4 @@
-FROM openjdk:17
+FROM openjdk:21
 WORKDIR eureka-server
 ADD target/eureka-server-0.0.1-SNAPSHOT.jar eureka-server-0.0.1-SNAPSHOT.jar
 EXPOSE 8761

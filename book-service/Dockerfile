@@ -1,4 +1,4 @@
-FROM openjdk:17
+FROM openjdk:21
 WORKDIR book-service
 ADD target/book-service-0.0.1-SNAPSHOT.jar book-service-0.0.1-SNAPSHOT.jar
 EXPOSE 8888
