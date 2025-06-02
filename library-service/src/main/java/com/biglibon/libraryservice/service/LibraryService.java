@@ -26,8 +26,8 @@ public class LibraryService {
         this.libraryMapper = libraryMapper;
     }
 
-    public LibraryDto create() {
-        return libraryMapper.toDto(repository.save(new Library()), bookServiceClient);
+    public LibraryDto create(LibraryDto libraryDto) {
+        return libraryMapper.toDto(repository.save(libraryMapper.toEntity(libraryDto)), bookServiceClient);
     }
 
     public List<LibraryDto> findAll() {
