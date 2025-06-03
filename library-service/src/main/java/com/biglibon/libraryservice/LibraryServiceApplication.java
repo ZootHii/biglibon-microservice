@@ -7,15 +7,12 @@ import com.biglibon.libraryservice.repository.LibraryRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @SpringBootApplication
-//@EnableDiscoveryClient
 @EnableFeignClients
 public class LibraryServiceApplication implements CommandLineRunner {
 
@@ -33,12 +30,14 @@ public class LibraryServiceApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Thread.sleep(31000); // little help for getting up book-service
-        Library library1 = new Library("Şems-i Sivasî İl Halk Kütüphanesi", "Sivas", "(0346) 221 11 12");
-        Library library2 = new Library("Milli Kütüphane", "Ankara", "(0312) 470 83 83",
-                List.of(Optional.ofNullable(bookServiceClient.getByIsbn("444").getBody())
-                        .map(BookDto::id).orElse(":D")));
+        if (libraryRepository.findAll().isEmpty()) {
+            Thread.sleep(58000); // little help for getting up book-service
+            Library library1 = new Library("Şems-i Sivasî İl Halk Kütüphanesi", "Sivas", "(0346) 221 11 12");
+            Library library2 = new Library("Milli Kütüphane", "Ankara", "(0312) 470 83 83",
+                    List.of(Optional.ofNullable(bookServiceClient.getByIsbn("444").getBody())
+                            .map(BookDto::id).orElse(":D")));
 
-        libraryRepository.saveAll(List.of(library1, library2));
+            libraryRepository.saveAll(List.of(library1, library2));
+        }
     }
 }

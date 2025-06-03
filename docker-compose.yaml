@@ -34,7 +34,7 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
       SERVER_PORT: 8888
       EUREKA_INSTANCE_PREFER_IP_ADDRESS: false
-      EUREKA_INSTANCE_HOSTNAME: api-gateway
+      SPRING_APPLICATION_NAME: api-gateway
     networks:
       - biglibon-network
     depends_on:
@@ -44,23 +44,21 @@ services:
 
   book-service:
     image: 'biglibon-microservice-book-service:latest'
-    container_name: book-service
     build:
       context: ./book-service
       dockerfile: Dockerfile
     restart: unless-stopped
-    ports:
-      - "8887:8887"
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
       SPRING_DATA_MONGODB_URI: mongodb://biglibon:biglibon@mongodb:27017/biglibon?authSource=admin
-      SERVER_PORT: 8887
       EUREKA_INSTANCE_PREFER_IP_ADDRESS: false
-      EUREKA_INSTANCE_HOSTNAME: book-service
+      SPRING_APPLICATION_NAME: book-service
     networks:
       - biglibon-network
-#    deploy:
-#      replicas: 1
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
     depends_on:
       - mongodb
       - postgresqldb
@@ -69,23 +67,21 @@ services:
 
   library-service:
     image: 'biglibon-microservice-library-service:latest'
-    container_name: library-service
     build:
       context: ./library-service
       dockerfile: Dockerfile
     restart: unless-stopped
-    ports:
-      - "8886:8886"
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgresqldb:5432/biglibon?user=biglibon&password=biglibon
-      SERVER_PORT: 8886
       EUREKA_INSTANCE_PREFER_IP_ADDRESS: false
-      EUREKA_INSTANCE_HOSTNAME: library-service
+      SPRING_APPLICATION_NAME: library-service
     networks:
       - biglibon-network
-#    deploy:
-#      replicas: 1
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
     depends_on:
       - mongodb
       - postgresqldb
@@ -93,7 +89,7 @@ services:
       - api-gateway
       - book-service
 
-####### Databases #######
+  ######## Databases #######
   postgresqldb:
     image: postgres
     container_name: postgresqldb

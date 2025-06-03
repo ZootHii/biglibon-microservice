@@ -4,6 +4,7 @@ import com.biglibon.bookservice.dto.BookDto;
 import com.biglibon.bookservice.service.BookService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -19,18 +20,23 @@ public class BookController {
     Logger logger = LoggerFactory.getLogger(BookController.class);
 
     private final BookService service;
+    private final Environment environment;
 
-    public BookController(BookService service) {
+
+    public BookController(BookService service, Environment environment) {
         this.service = service;
+        this.environment = environment;
     }
 
     @PostMapping
     public ResponseEntity<BookDto> create(@RequestBody BookDto bookDto) {
+        logger.info("Library created on port: {}", environment.getProperty("local.server.port"));
         return ResponseEntity.ok(service.create(bookDto));
     }
 
     @GetMapping
     public ResponseEntity<List<BookDto>> getAll() {
+        logger.info("Library created on port: {}", environment.getProperty("local.server.port"));
         return ResponseEntity.ok(service.findAll());
     }
 

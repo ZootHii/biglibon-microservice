@@ -1,9 +1,9 @@
 spring:
+  application:
+    name: library-service
   cloud:
     client:
       hostname: library-service
-  application:
-    name: library-service
   datasource:
     url: jdbc:postgresql://localhost:5432/biglibon
     username: biglibon
@@ -21,8 +21,8 @@ spring:
 eureka:
   instance:
     prefer-ip-address: true # overwrite on docker-compose as false
-    hostname: library-service # overwrite on docker-compose as library-service
-    instance-id: ${spring.application.name}:${hostname}:${server.port}
+    hostname: ${spring.cloud.client.hostname} # overwrite on docker-compose as library-service
+    instance-id: ${spring.application.name}:${random.uuid}:${eureka.instance.hostname}:${server.port}
   client:
     enabled: true
     register-with-eureka: true
