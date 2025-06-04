@@ -1,91 +1,121 @@
 version: '3.9'
 
 services:
-#  eureka-server:
-#    image: 'biglibon-microservice-eureka-server:latest'
-#    container_name: eureka-server
-#    build:
-#      context: ./eureka-server
-#      dockerfile: Dockerfile
-#    restart: unless-stopped
-#    ports:
-#      - "8761:8761"
-#    networks:
-#      - biglibon-network
-#
-#  api-gateway:
-#    image: 'biglibon-microservice-api-gateway:latest'
-#    container_name: api-gateway
-#    build:
-#      context: ./api-gateway
-#      dockerfile: Dockerfile
-#    restart: unless-stopped
-#    ports:
-#      - "8888:8888"
-#    depends_on:
-#      - eureka-server
-#    networks:
-#      - biglibon-network
-#    environment:
-#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
-#
-#  book-service:
-#    image: 'biglibon-microservice-book-service:latest'
-#    container_name: book-service
-#    build:
-#      context: ./book-service
-#      dockerfile: Dockerfile
-#    restart: unless-stopped
-#    environment:
-#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
-#    networks:
-#      - biglibon-network
-#    deploy:
-#      replicas: 1
-#    depends_on:
-#      - eureka-server
-#      - api-gateway
-#
-#  library-service:
-#    image: 'biglibon-microservice-library-service:latest'
-#    container_name: library-service
-#    build:
-#      context: ./library-service
-#      dockerfile: Dockerfile
-#    restart: unless-stopped
-#    environment:
-#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
-#    networks:
-#      - biglibon-network
-#    deploy:
-#      replicas: 1
-#    depends_on:
-#      - eureka-server
-#      - api-gateway
+  eureka-server:
+    image: 'biglibon-microservice-eureka-server:latest'
+    container_name: eureka-server
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8761:8761"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      SERVER_PORT: 8761
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: false
+      EUREKA_INSTANCE_HOSTNAME: eureka-server
+    networks:
+      - biglibon-network
+    depends_on:
+      - mongodb
+      - postgresqldb
 
-######## Databases #######
-#  postgresqldb:
-#    image: postgres
-#    container_name: postgresqldb
-#    ports:
-#      - "5432:5432"
-#    restart: unless-stopped
-#    environment:
-#      - POSTGRES_USER=biglibon
-#      - POSTGRES_PASSWORD=biglibon
-#      - POSTGRES_DB=biglibon
-#    volumes:
-#      - postgres_data:/var/lib/postgresql/data
+  api-gateway:
+    image: 'biglibon-microservice-api-gateway:latest'
+    container_name: api-gateway
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      SERVER_PORT: 8888
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: false
+      SPRING_APPLICATION_NAME: api-gateway
+    networks:
+      - biglibon-network
+    depends_on:
+      - mongodb
+      - postgresqldb
+      - eureka-server
+
+  book-service:
+    image: 'biglibon-microservice-book-service:latest'
+    build:
+      context: ./book-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      SPRING_DATA_MONGODB_URI: mongodb://biglibon:biglibon@mongodb:27017/biglibon?authSource=admin
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: false
+      SPRING_APPLICATION_NAME: book-service
+    networks:
+      - biglibon-network
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+    depends_on:
+      - mongodb
+      - postgresqldb
+      - eureka-server
+      - api-gateway
+
+  library-service:
+    image: 'biglibon-microservice-library-service:latest'
+    build:
+      context: ./library-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresqldb:5432/biglibon?user=biglibon&password=biglibon
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: false
+      SPRING_APPLICATION_NAME: library-service
+    networks:
+      - biglibon-network
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+    depends_on:
+      - mongodb
+      - postgresqldb
+      - eureka-server
+      - api-gateway
+      - book-service
+
+  ######## Databases #######
+  postgresqldb:
+    image: postgres
+    container_name: postgresqldb
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=biglibon
+      - POSTGRES_PASSWORD=biglibon
+      - POSTGRES_DB=biglibon
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - biglibon-network
 
   mongodb:
     image: mongo
     container_name: mongodb
+    restart: unless-stopped
     ports:
       - "27017:27017"
-    restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: biglibon
       MONGO_INITDB_ROOT_PASSWORD: biglibon
+    networks:
+      - biglibon-network
     volumes:
       - mongo-data:/data/db
 
@@ -100,27 +130,31 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: biglibon
       ME_CONFIG_MONGODB_SERVER: mongodb
       ME_CONFIG_MONGODB_URL: "mongodb://biglibon:biglibon@mongodb:27017/"
+    networks:
+      - biglibon-network
     depends_on:
       - mongodb
 
-#  pgadmin:
-#    image: dpage/pgadmin4
-#    container_name: postgresqlui
-#    restart: unless-stopped
-#    ports:
-#      - "5050:80"
-#    environment:
-#      PGADMIN_DEFAULT_EMAIL: admin@biglibon.com
-#      PGADMIN_DEFAULT_PASSWORD: biglibon
-#    depends_on:
-#      - postgresqldb
-#    volumes:
-#      - pgadmin_data:/var/lib/pgadmin
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: postgresqlui
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@biglibon.com
+      PGADMIN_DEFAULT_PASSWORD: biglibon
+    networks:
+      - biglibon-network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgresqldb
 
 ####### Volumes #######
 volumes:
-#  postgres_data:
-#  pgadmin_data:
+  postgres_data:
+  pgadmin_data:
   mongo-data:
 
 ####### Networks #######

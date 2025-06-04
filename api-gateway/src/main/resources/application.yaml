@@ -2,6 +2,8 @@ spring:
   application:
     name: api-gateway
   cloud:
+    client:
+      hostname: api-gateway
     gateway:
       server:
         webflux:
@@ -23,16 +25,25 @@ server:
 
 eureka:
   instance:
-    prefer-ip-address: true
+    leaseRenewalIntervalInSeconds: 10   # Heartbeat check time
+    prefer-ip-address: true # overwrite on docker-compose as false
+    hostname: ${spring.cloud.client.hostname} # overwrite on docker-compose as api-gateway
+    instance-id: ${spring.application.name}:${random.uuid}:${eureka.instance.hostname}:${server.port}
   client:
+    enabled: true
     register-with-eureka: true
     fetch-registry: true
-  service-url:
-    defaultZone: http://localhost:8761/eureka # value will get overriden if passed from external config
-
+    service-url:
+      defaultZone: http://localhost:8761/eureka # value will get overriden if passed from external config
 
 management:
   endpoints:
     web:
       exposure:
         include: "*" # adds all actuator endpoints (like health (shows that app is live?))
+
+logging:
+  level:
+    com.netflix.discovery: DEBUG
+
+spring.cloud.service-registry.auto-registration.enabled: true

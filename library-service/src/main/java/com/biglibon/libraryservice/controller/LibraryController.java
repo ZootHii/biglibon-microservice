@@ -3,7 +3,6 @@ package com.biglibon.libraryservice.controller;
 import com.biglibon.libraryservice.dto.AddBooksToLibraryByIdsRequestDto;
 import com.biglibon.libraryservice.dto.LibraryDto;
 import com.biglibon.libraryservice.service.LibraryService;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +36,7 @@ public class LibraryController {
 
     @GetMapping
     public ResponseEntity<List<LibraryDto>> getAll() {
+        logger.info("Library created on port: {}", environment.getProperty("local.server.port"));
         return ResponseEntity.ok(libraryService.findAll());
     }
 
