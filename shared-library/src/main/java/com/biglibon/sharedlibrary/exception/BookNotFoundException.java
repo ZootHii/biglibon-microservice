@@ -1,6 +1,5 @@
-package com.biglibon.libraryservice.exception;
+package com.biglibon.sharedlibrary.exception;
 
-import com.biglibon.libraryservice.client.ExceptionMessage;
 import lombok.Getter;
 
 @Getter

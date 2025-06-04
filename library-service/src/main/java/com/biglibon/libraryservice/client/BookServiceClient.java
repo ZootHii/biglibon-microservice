@@ -1,6 +1,7 @@
 package com.biglibon.libraryservice.client;
 
-import com.biglibon.libraryservice.dto.BookDto;
+
+import com.biglibon.sharedlibrary.dto.BookDto;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

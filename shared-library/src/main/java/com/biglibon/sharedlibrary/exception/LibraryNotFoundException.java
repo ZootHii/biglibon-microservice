@@ -1,4 +1,4 @@
-package com.biglibon.libraryservice.exception;
+package com.biglibon.sharedlibrary.exception;
 
 public class LibraryNotFoundException extends RuntimeException {
 

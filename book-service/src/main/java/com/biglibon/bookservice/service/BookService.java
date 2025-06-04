@@ -1,10 +1,10 @@
 package com.biglibon.bookservice.service;
 
-import com.biglibon.bookservice.dto.BookDto;
-import com.biglibon.bookservice.exception.BookNotFoundException;
 import com.biglibon.bookservice.mapper.BookMapper;
 import com.biglibon.bookservice.model.Book;
 import com.biglibon.bookservice.repository.BookRepository;
+import com.biglibon.sharedlibrary.dto.BookDto;
+import com.biglibon.sharedlibrary.exception.BookNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

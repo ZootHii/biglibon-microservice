@@ -1,7 +1,7 @@
 package com.biglibon.bookservice.mapper;
 
-import com.biglibon.bookservice.dto.BookDto;
 import com.biglibon.bookservice.model.Book;
+import com.biglibon.sharedlibrary.dto.BookDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

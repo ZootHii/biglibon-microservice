@@ -1,9 +1,10 @@
 package com.biglibon.libraryservice.mapper;
 
 import com.biglibon.libraryservice.client.BookServiceClient;
-import com.biglibon.libraryservice.dto.BookDto;
+
 import com.biglibon.libraryservice.dto.LibraryDto;
 import com.biglibon.libraryservice.model.Library;
+import com.biglibon.sharedlibrary.dto.BookDto;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

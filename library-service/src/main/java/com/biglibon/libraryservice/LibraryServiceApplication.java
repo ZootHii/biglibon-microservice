@@ -1,9 +1,9 @@
 package com.biglibon.libraryservice;
 
 import com.biglibon.libraryservice.client.BookServiceClient;
-import com.biglibon.libraryservice.dto.BookDto;
 import com.biglibon.libraryservice.model.Library;
 import com.biglibon.libraryservice.repository.LibraryRepository;
+import com.biglibon.sharedlibrary.dto.BookDto;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

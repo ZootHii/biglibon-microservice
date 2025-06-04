@@ -1,5 +1,7 @@
 package com.biglibon.libraryservice.exception;
 
+import com.biglibon.sharedlibrary.exception.BookNotFoundException;
+import com.biglibon.sharedlibrary.exception.LibraryNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -1,7 +1,7 @@
 package com.biglibon.bookservice.controller;
 
-import com.biglibon.bookservice.dto.BookDto;
 import com.biglibon.bookservice.service.BookService;
+import com.biglibon.sharedlibrary.dto.BookDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
