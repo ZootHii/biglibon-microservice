@@ -10,6 +10,5 @@ public record BookDto(
         String publisher,
         String isbn,
         Instant createdAt,
-        Instant updatedAt
-) {
+        Instant updatedAt) {
 }

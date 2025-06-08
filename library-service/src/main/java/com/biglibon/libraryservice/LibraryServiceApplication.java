@@ -1,6 +1,6 @@
 package com.biglibon.libraryservice;
 
-import com.biglibon.libraryservice.client.BookServiceClient;
+import com.biglibon.sharedlibrary.client.BookServiceClient;
 import com.biglibon.libraryservice.model.Library;
 import com.biglibon.libraryservice.repository.LibraryRepository;
 import com.biglibon.sharedlibrary.dto.BookDto;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @SpringBootApplication
-@EnableFeignClients
+@EnableFeignClients(clients = BookServiceClient.class)
 @Import(GlobalExceptionHandler.class)
 public class LibraryServiceApplication implements CommandLineRunner {
 

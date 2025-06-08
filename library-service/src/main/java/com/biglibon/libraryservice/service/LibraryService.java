@@ -1,10 +1,10 @@
 package com.biglibon.libraryservice.service;
 
-import com.biglibon.libraryservice.client.BookServiceClient;
+import com.biglibon.sharedlibrary.client.BookServiceClient;
 import com.biglibon.libraryservice.dto.AddBooksToLibraryByIdsRequestDto;
 import com.biglibon.libraryservice.mapper.LibraryMapper;
 import com.biglibon.libraryservice.model.Library;
-import com.biglibon.libraryservice.dto.LibraryDto;
+import com.biglibon.sharedlibrary.dto.LibraryDto;
 import com.biglibon.libraryservice.repository.LibraryRepository;
 import com.biglibon.sharedlibrary.dto.BookDto;
 import com.biglibon.sharedlibrary.exception.LibraryNotFoundException;

@@ -1,6 +1,4 @@
-package com.biglibon.libraryservice.dto;
-
-import com.biglibon.sharedlibrary.dto.BookDto;
+package com.biglibon.sharedlibrary.dto;
 
 import java.util.List;
 

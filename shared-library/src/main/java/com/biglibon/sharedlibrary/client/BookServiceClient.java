@@ -1,4 +1,4 @@
-package com.biglibon.libraryservice.client;
+package com.biglibon.sharedlibrary.client;
 
 
 import com.biglibon.sharedlibrary.dto.BookDto;
@@ -61,3 +61,4 @@ public interface BookServiceClient {
 //        return ResponseEntity.ok(null);
 //    }
 }
+

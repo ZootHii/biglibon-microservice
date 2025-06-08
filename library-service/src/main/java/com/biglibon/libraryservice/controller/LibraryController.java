@@ -1,7 +1,7 @@
 package com.biglibon.libraryservice.controller;
 
 import com.biglibon.libraryservice.dto.AddBooksToLibraryByIdsRequestDto;
-import com.biglibon.libraryservice.dto.LibraryDto;
+import com.biglibon.sharedlibrary.dto.LibraryDto;
 import com.biglibon.libraryservice.service.LibraryService;
 import com.biglibon.sharedlibrary.dto.BookDto;
 import jakarta.validation.constraints.NotBlank;
