@@ -23,8 +23,7 @@ public class BookService {
     public BookDto create(BookDto bookDto) {
         // some checks can be performed
         Book newBook = bookMapper.toEntity(bookDto);
-        repository.save(newBook);
-        return bookDto;
+        return bookMapper.toDto(repository.save(newBook));
     }
 
     public List<BookDto> findAllByIds(List<String> ids) {

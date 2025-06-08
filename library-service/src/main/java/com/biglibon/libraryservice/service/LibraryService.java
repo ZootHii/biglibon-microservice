@@ -6,6 +6,7 @@ import com.biglibon.libraryservice.mapper.LibraryMapper;
 import com.biglibon.libraryservice.model.Library;
 import com.biglibon.libraryservice.dto.LibraryDto;
 import com.biglibon.libraryservice.repository.LibraryRepository;
+import com.biglibon.sharedlibrary.dto.BookDto;
 import com.biglibon.sharedlibrary.exception.LibraryNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +52,13 @@ public class LibraryService {
         return libraryMapper.toDto(library, bookServiceClient);
     }
 
+    public List<BookDto> getAllBooksFromLibraryService() {
+        return bookServiceClient.getAll().getBody();
+    }
+
+    public BookDto getBookByIdFromLibraryService(String id) {
+        return bookServiceClient.getById(id).getBody();
+    }
 
 //    public void addBookToLibraryByIsbn(AddBookRequestDto addBookRequestDto) {
 //        String isbn = bookServiceClient.getByIsbn(addBookRequestDto.isbn()).getBody().isbn();

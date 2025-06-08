@@ -3,6 +3,8 @@ package com.biglibon.libraryservice.controller;
 import com.biglibon.libraryservice.dto.AddBooksToLibraryByIdsRequestDto;
 import com.biglibon.libraryservice.dto.LibraryDto;
 import com.biglibon.libraryservice.service.LibraryService;
+import com.biglibon.sharedlibrary.dto.BookDto;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +51,20 @@ public class LibraryController {
     @GetMapping("/{id}")
     public ResponseEntity<LibraryDto> getWithBooksById(@PathVariable @NotNull Long id) {
         return ResponseEntity.ok(libraryService.findWithBooksById(id));
+    }
+
+    // For testing
+    @GetMapping("/books")
+    public ResponseEntity<List<BookDto>> getAllBooksFromLibraryService() {
+        logger.info("Library created on port: {}", environment.getProperty("local.server.port"));
+        return ResponseEntity.ok(libraryService.getAllBooksFromLibraryService());
+    }
+
+    // For testing
+    @GetMapping("/books/id/{id}")
+    public ResponseEntity<BookDto> getBookByIdFromLibraryService(@PathVariable @NotBlank String id) {
+        logger.info("Library created on port: {}", environment.getProperty("local.server.port"));
+        return ResponseEntity.ok(libraryService.getBookByIdFromLibraryService(id));
     }
 
 

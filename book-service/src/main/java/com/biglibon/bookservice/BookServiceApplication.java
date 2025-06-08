@@ -2,17 +2,20 @@ package com.biglibon.bookservice;
 
 import com.biglibon.bookservice.model.Book;
 import com.biglibon.bookservice.repository.BookRepository;
+import com.biglibon.sharedlibrary.config.MongoConfig;
+import com.biglibon.sharedlibrary.exception.GlobalExceptionHandler;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.context.annotation.Import;
 
+import java.time.Instant;
 import java.util.List;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableMongoRepositories
+@Import({MongoConfig.class, GlobalExceptionHandler.class})
 public class BookServiceApplication implements CommandLineRunner {
 
     private final BookRepository bookRepository;
@@ -33,7 +36,7 @@ public class BookServiceApplication implements CommandLineRunner {
             Book book2 = new Book("Hamlet", 1602, "William Shakespeare", "Ren Yayınları", "222");
             Book book3 = new Book("Cesur Yeni Dünya", 1932, "Aldous Huxley", "İthaki Yayınları", "333");
             Book book4 = new Book("Masumiyet Müzesi", 2008, "Orhan Pamuk", "YKY", "444");
-
+            book4.setCreatedAt(Instant.now());
             List<Book> books = bookRepository.saveAll(List.of(book1, book2, book3, book4));
             System.out.println(books);
         }
