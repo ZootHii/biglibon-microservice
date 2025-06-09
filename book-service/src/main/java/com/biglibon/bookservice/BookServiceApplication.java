@@ -4,13 +4,13 @@ import com.biglibon.bookservice.model.Book;
 import com.biglibon.bookservice.repository.BookRepository;
 import com.biglibon.sharedlibrary.config.MongoConfig;
 import com.biglibon.sharedlibrary.exception.GlobalExceptionHandler;
+import com.mongodb.DuplicateKeyException;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Import;
 
-import java.time.Instant;
 import java.util.List;
 
 @SpringBootApplication
@@ -30,15 +30,15 @@ public class BookServiceApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        Book book1 = new Book("Sineklerin Tanrısı", 1954, "William Golding", "Kültür Yayınları", "111");
+        Book book2 = new Book("Hamlet", 1602, "William Shakespeare", "Ren Yayınları", "222");
+        Book book3 = new Book("Cesur Yeni Dünya", 1932, "Aldous Huxley", "İthaki Yayınları", "333");
+        Book book4 = new Book("Masumiyet Müzesi", 2008, "Orhan Pamuk", "YKY", "444");
+        try {
+            System.out.println("Saved Books: " + bookRepository.saveAll(List.of(book1, book2, book3, book4)));
 
-        if (bookRepository.findAll().isEmpty()) {
-            Book book1 = new Book("Sineklerin Tanrısı", 1954, "William Golding", "Kültür Yayınları", "111");
-            Book book2 = new Book("Hamlet", 1602, "William Shakespeare", "Ren Yayınları", "222");
-            Book book3 = new Book("Cesur Yeni Dünya", 1932, "Aldous Huxley", "İthaki Yayınları", "333");
-            Book book4 = new Book("Masumiyet Müzesi", 2008, "Orhan Pamuk", "YKY", "444");
-            book4.setCreatedAt(Instant.now());
-            List<Book> books = bookRepository.saveAll(List.of(book1, book2, book3, book4));
-            System.out.println(books);
+        } catch (Exception e) {
+            System.out.println("Skipping duplicate entry: " + e.getMessage());
         }
     }
 }

@@ -11,10 +11,10 @@ import java.time.Instant;
 import java.util.List;
 
 @Entity
-@Table(name = "libraries")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "libraries", uniqueConstraints = @UniqueConstraint(columnNames = {"name", "city", "phone"}))
 public class Library {
 
     @Id

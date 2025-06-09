@@ -1,5 +1,7 @@
-package com.biglibon.bookservice.model;
+package com.biglibon.catalogservice.model;
 
+import com.biglibon.sharedlibrary.dto.BookSummaryDto;
+import com.biglibon.sharedlibrary.dto.LibrarySummaryDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,25 +13,21 @@ import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
+import java.util.List;
 
-@Document(collection = "books")
+@Document(collection = "catalogs")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Persistent
-@CompoundIndex(def = "{'isbn': 1}", unique = true)
-public class Book {
+@CompoundIndex(def = "{'book.bookId': 1}", unique = true)
+public class Catalog {
 
     @Id
     private String id;
 
-    private String title;
-    private int publicationYear;
-    private String author;
-    private String publisher;
-
-    //@Indexed(unique = true, background = true)
-    private String isbn;
+    private BookSummaryDto book;
+    private List<LibrarySummaryDto> libraries;
 
     @CreatedDate
     private Instant createdAt;
@@ -37,12 +35,8 @@ public class Book {
     @LastModifiedDate
     private Instant updatedAt;
 
-
-    public Book(String title, Integer publicationYear, String author, String publisher, String isbn) {
-        this.title = title;
-        this.publicationYear = publicationYear;
-        this.author = author;
-        this.publisher = publisher;
-        this.isbn = isbn;
+    public Catalog(BookSummaryDto book, List<LibrarySummaryDto> libraries) {
+        this.book = book;
+        this.libraries = libraries;
     }
 }

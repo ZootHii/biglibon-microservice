@@ -33,14 +33,19 @@ public class LibraryServiceApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (libraryRepository.findAll().isEmpty()) {
-            Thread.sleep(58000); // little help for getting up book-service
-            Library library1 = new Library("Şems-i Sivasî İl Halk Kütüphanesi", "Sivas", "(0346) 221 11 12");
-            Library library2 = new Library("Milli Kütüphane", "Ankara", "(0312) 470 83 83",
-                    List.of(Optional.ofNullable(bookServiceClient.getByIsbn("444").getBody())
-                            .map(BookDto::id).orElse(":D")));
+        initialize();
+    }
 
-            libraryRepository.saveAll(List.of(library1, library2));
+    public void initialize() throws InterruptedException {
+        Thread.sleep(58000); // little help for getting up book-service
+        Library library1 = new Library("Şems-i Sivasî İl Halk Kütüphanesi", "Sivas", "(0346) 221 11 12");
+        Library library2 = new Library("Milli Kütüphane", "Ankara", "(0312) 470 83 83",
+                List.of(Optional.ofNullable(bookServiceClient.getByIsbn("444").getBody())
+                        .map(BookDto::id).orElse(":D")));
+        try {
+            System.out.println("Saved Libraries: " + libraryRepository.saveAll(List.of(library1, library2)));
+        } catch (Exception e) {
+            System.out.println("Skipping duplicate entry: " + e.getMessage());
         }
     }
 }
