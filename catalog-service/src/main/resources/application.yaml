@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: catalog-service
+  cloud:
+    client:
+      hostname: catalog-service
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: biglibon
+      username: biglibon
+      password: biglibon
+      authentication-database: admin
+      auto-index-creation: true
+  jpa:
+    show-sql: true
+
+eureka:
+  instance:
+    prefer-ip-address: true # overwrite on docker-compose as false
+    hostname: ${spring.cloud.client.hostname} # overwrite on docker-compose as catalog-service
+    instance-id: ${spring.application.name}:${random.uuid}:${eureka.instance.hostname}:${server.port}
+  client:
+    enabled: true
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka # value will get overriden if passed from external config
+
+server:
+  port: 0 # Random port assignment, overwrite on docker-compose as 8887, because can not open random port
+
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: DEBUG  # Shows executed SQL queries
+    org.hibernate.type.descriptor.sql: TRACE  # Shows parameter bindings
+    org.springframework.web: info
+    web: debug
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - "*"
+
+spring.cloud.service-registry.auto-registration.enabled: true

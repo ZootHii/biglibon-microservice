@@ -89,6 +89,31 @@ services:
       - api-gateway
       - book-service
 
+  catalog-service:
+    image: 'biglibon-microservice-catalog-service:latest'
+    build:
+      context: ./catalog-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      SPRING_DATA_MONGODB_URI: mongodb://biglibon:biglibon@mongodb:27017/biglibon?authSource=admin
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: false
+      SPRING_APPLICATION_NAME: catalog-service
+    networks:
+      - biglibon-network
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+    depends_on:
+      - mongodb
+      - postgresqldb
+      - eureka-server
+      - api-gateway
+      - book-service
+      - library-service
+
   ######## Databases #######
   postgresqldb:
     image: postgres

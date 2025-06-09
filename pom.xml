@@ -19,6 +19,7 @@
         <module>api-gateway</module>
         <module>book-service</module>
         <module>library-service</module>
+        <module>catalog-service</module>
     </modules>
 
 
