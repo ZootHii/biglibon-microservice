@@ -2,8 +2,12 @@ package com.biglibon.bookservice;
 
 import com.biglibon.bookservice.model.Book;
 import com.biglibon.bookservice.repository.BookRepository;
+import com.biglibon.sharedlibrary.config.KafkaConfig;
 import com.biglibon.sharedlibrary.config.MongoConfig;
+import com.biglibon.sharedlibrary.consumer.GlobalKafkaEventConsumer;
+import com.biglibon.sharedlibrary.consumer.KafkaEventConsumerRegistry;
 import com.biglibon.sharedlibrary.exception.GlobalExceptionHandler;
+import com.biglibon.sharedlibrary.producer.GlobalKafkaEventProducer;
 import com.mongodb.DuplicateKeyException;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -15,7 +19,7 @@ import java.util.List;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@Import({MongoConfig.class, GlobalExceptionHandler.class})
+@Import({MongoConfig.class, GlobalExceptionHandler.class, KafkaConfig.class, GlobalKafkaEventProducer.class, GlobalKafkaEventConsumer.class, KafkaEventConsumerRegistry.class})
 public class BookServiceApplication implements CommandLineRunner {
 
     private final BookRepository bookRepository;

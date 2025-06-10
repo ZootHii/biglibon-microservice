@@ -3,8 +3,10 @@ package com.biglibon.bookservice.service;
 import com.biglibon.bookservice.mapper.BookMapper;
 import com.biglibon.bookservice.model.Book;
 import com.biglibon.bookservice.repository.BookRepository;
+import com.biglibon.sharedlibrary.constant.KafkaTopics;
 import com.biglibon.sharedlibrary.dto.BookDto;
 import com.biglibon.sharedlibrary.exception.BookNotFoundException;
+import com.biglibon.sharedlibrary.producer.GlobalKafkaEventProducer;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,16 +16,20 @@ public class BookService {
 
     private final BookRepository repository;
     private final BookMapper bookMapper;
+    private final GlobalKafkaEventProducer kafkaProducer;
 
-    public BookService(BookRepository repository, BookMapper bookMapper) {
+    public BookService(BookRepository repository, BookMapper bookMapper, GlobalKafkaEventProducer kafkaProducer) {
         this.repository = repository;
         this.bookMapper = bookMapper;
+        this.kafkaProducer = kafkaProducer;
     }
 
     public BookDto create(BookDto bookDto) {
         // some checks can be performed
         Book newBook = bookMapper.toEntity(bookDto);
-        return bookMapper.toDto(repository.save(newBook));
+        BookDto savedBookDto = bookMapper.toDto(repository.save(newBook));
+        kafkaProducer.sendMessage(KafkaTopics.BS_BOOK_ADDED, savedBookDto);
+        return savedBookDto;
     }
 
     public List<BookDto> findAllByIds(List<String> ids) {

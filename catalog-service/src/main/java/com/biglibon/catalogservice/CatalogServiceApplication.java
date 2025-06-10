@@ -2,11 +2,15 @@ package com.biglibon.catalogservice;
 
 import com.biglibon.catalogservice.model.Catalog;
 import com.biglibon.catalogservice.repository.CatalogRepository;
+import com.biglibon.sharedlibrary.config.KafkaConfig;
 import com.biglibon.sharedlibrary.config.MongoConfig;
+import com.biglibon.sharedlibrary.consumer.GlobalKafkaEventConsumer;
+import com.biglibon.sharedlibrary.consumer.KafkaEventConsumer;
+import com.biglibon.sharedlibrary.consumer.KafkaEventConsumerRegistry;
 import com.biglibon.sharedlibrary.dto.BookSummaryDto;
 import com.biglibon.sharedlibrary.dto.LibrarySummaryDto;
 import com.biglibon.sharedlibrary.exception.GlobalExceptionHandler;
-import com.mongodb.DuplicateKeyException;
+import com.biglibon.sharedlibrary.producer.GlobalKafkaEventProducer;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,7 +19,7 @@ import org.springframework.context.annotation.Import;
 import java.util.List;
 
 @SpringBootApplication
-@Import({MongoConfig.class, GlobalExceptionHandler.class})
+@Import({MongoConfig.class, GlobalExceptionHandler.class, KafkaConfig.class, GlobalKafkaEventProducer.class, GlobalKafkaEventConsumer.class, KafkaEventConsumerRegistry.class})
 public class CatalogServiceApplication implements CommandLineRunner {
 
     private final CatalogRepository catalogRepository;

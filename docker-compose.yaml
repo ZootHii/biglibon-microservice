@@ -114,9 +114,9 @@ services:
       - book-service
       - library-service
 
-  ######## Databases #######
+######## Databases #######
   postgresqldb:
-    image: postgres
+    image: postgres:17.5
     container_name: postgresqldb
     restart: unless-stopped
     ports:
@@ -131,7 +131,7 @@ services:
       - biglibon-network
 
   mongodb:
-    image: mongo
+    image: mongo:8.0.10
     container_name: mongodb
     restart: unless-stopped
     ports:
@@ -145,7 +145,7 @@ services:
       - mongo-data:/data/db
 
   mongo-express:
-    image: mongo-express
+    image: mongo-express:1.0.2-18
     container_name: mongoui
     restart: unless-stopped
     ports:
@@ -161,7 +161,7 @@ services:
       - mongodb
 
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:9.4.0
     container_name: postgresqlui
     restart: unless-stopped
     ports:
@@ -176,11 +176,57 @@ services:
     depends_on:
       - postgresqldb
 
+####### Kafka #######
+  kafka:
+    image: apache/kafka:3.9.1
+    container_name: kafka
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_KRAFT_MODE: "true"  # This enables KRaft mode in Kafka.
+      KAFKA_PROCESS_ROLES: "controller,broker" # Kafka acts as both broker and controller.
+      KAFKA_NODE_ID: 1  # A unique ID for this Kafka instance.
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@localhost:9093"  # Defines the controller voters.
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT" # All listeners use PLAINTEXT (no SSL or SASL authentication).
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT" # Defines which listener brokers use to communicate. Must match one of the listeners in KAFKA_LISTENERS
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER" # Defines which listener controllers use for metadata management. Must match a listener name in KAFKA_LISTENERS.
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://localhost:9092"
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"  # Where Kafka stores its logs.
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"  # Kafka will automatically create topics if needed.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1  # Since we’re running one broker, one replica is enough.
+      KAFKA_LOG_RETENTION_HOURS: 168  # Keep logs for 7 days.
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0  # No delay for consumer rebalancing.
+      CLUSTER_ID: "Biglibon-Mk3OEYBSD34fcwNTJENDM2Qk"  # A unique ID for the Kafka cluster.
+    networks:
+      - biglibon-network
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+
+  kafkaui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafkaui
+    restart: unless-stopped
+    ports:
+      - "9090:8080"
+    environment:
+      DYNAMIC_CONFIG_ENABLED: "true"
+      KAFKA_CLUSTERS_0_NAME: "biglibon-cluster"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka:9092"
+    networks:
+      - biglibon-network
+    depends_on:
+      - kafka
+
+
 ####### Volumes #######
 volumes:
   postgres_data:
   pgadmin_data:
   mongo-data:
+  kafka-data:
 
 ####### Networks #######
 networks:
