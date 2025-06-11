@@ -10,16 +10,16 @@ import java.util.concurrent.CompletableFuture;
 
 @Component
 @Slf4j
-public class GlobalKafkaEventProducer {
+public class KafkaProducer {
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public GlobalKafkaEventProducer(KafkaTemplate<String, Object> kafkaTemplate) {
+    public KafkaProducer(KafkaTemplate<String, String> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void sendMessage(String topic, Object payload) {
-        final CompletableFuture<SendResult<String, Object>> futureResult = kafkaTemplate.send(topic, payload);
+    public void sendMessage(String topic, String message) {
+        final CompletableFuture<SendResult<String, String>> futureResult = kafkaTemplate.send(topic, message);
 
         futureResult.whenComplete((result, ex) -> {
             if (ex != null) {
@@ -27,11 +27,11 @@ public class GlobalKafkaEventProducer {
                 return;
             }
             if (Objects.isNull(result)) {
-                log.info("Empty result on success for topic {} and payload {}", topic, payload);
+                log.info("Empty result on success for topic {} and payload {}", topic, message);
                 return;
             }
             log.info("Message :{} published, topic : {}, partition : {} and offset : {}",
-                    payload,
+                    message,
                     result.getRecordMetadata().topic(),
                     result.getRecordMetadata().partition(),
                     result.getRecordMetadata().offset());

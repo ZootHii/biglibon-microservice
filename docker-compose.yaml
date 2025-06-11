@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   eureka-server:
     image: 'biglibon-microservice-eureka-server:latest'
@@ -18,8 +16,8 @@ services:
     networks:
       - biglibon-network
     depends_on:
-      - mongodb
-      - postgresqldb
+      - mongo-db
+      - postgres-db
 
   api-gateway:
     image: 'biglibon-microservice-api-gateway:latest'
@@ -38,8 +36,6 @@ services:
     networks:
       - biglibon-network
     depends_on:
-      - mongodb
-      - postgresqldb
       - eureka-server
 
   book-service:
@@ -49,21 +45,26 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
+      SPRING_PROFILES_ACTIVE: docker
+      KAFKA_BOOTSTRAP_SERVERS: kafka-4:9092, kafka-5:9092, kafka-6:9092, kafka-7:9092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
-      SPRING_DATA_MONGODB_URI: mongodb://biglibon:biglibon@mongodb:27017/biglibon?authSource=admin
+#      SPRING_DATA_MONGODB_URI: mongodb://biglibon:biglibon@mongo-db:27017/biglibon?authSource=admin
+      SPRING_DATA_MONGODB_HOST: mongo-db
+      SPRING_DATA_MONGODB_PORT: 27017
+      SPRING_DATA_MONGODB_DATABASE: biglibon
+      SPRING_DATA_MONGODB_USERNAME: biglibon
+      SPRING_DATA_MONGODB_PASSWORD: biglibon
+      SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE: admin
       EUREKA_INSTANCE_PREFER_IP_ADDRESS: false
       SPRING_APPLICATION_NAME: book-service
     networks:
       - biglibon-network
     deploy:
-      replicas: 3
+      replicas: 2
       restart_policy:
         condition: on-failure
     depends_on:
-      - mongodb
-      - postgresqldb
       - eureka-server
-      - api-gateway
 
   library-service:
     image: 'biglibon-microservice-library-service:latest'
@@ -73,20 +74,19 @@ services:
     restart: unless-stopped
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresqldb:5432/biglibon?user=biglibon&password=biglibon
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/biglibon?user=biglibon&password=biglibon
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/biglibon
+#      SPRING_DATASOURCE_USERNAME: biglibon
+#      SPRING_DATASOURCE_PASSWORD: biglibon
       EUREKA_INSTANCE_PREFER_IP_ADDRESS: false
       SPRING_APPLICATION_NAME: library-service
     networks:
       - biglibon-network
     deploy:
-      replicas: 3
+      replicas: 2
       restart_policy:
         condition: on-failure
     depends_on:
-      - mongodb
-      - postgresqldb
-      - eureka-server
-      - api-gateway
       - book-service
 
   catalog-service:
@@ -96,137 +96,26 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
+      SPRING_PROFILES_ACTIVE: docker
+      KAFKA_BOOTSTRAP_SERVERS: kafka-4:9092, kafka-5:9092, kafka-6:9092, kafka-7:9092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
-      SPRING_DATA_MONGODB_URI: mongodb://biglibon:biglibon@mongodb:27017/biglibon?authSource=admin
+#      SPRING_DATA_MONGODB_URI: mongodb://biglibon:biglibon@mongo-db:27017/biglibon?authSource=admin
+      SPRING_DATA_MONGODB_HOST: mongo-db
+      SPRING_DATA_MONGODB_PORT: 27017
+      SPRING_DATA_MONGODB_DATABASE: biglibon
+      SPRING_DATA_MONGODB_USERNAME: biglibon
+      SPRING_DATA_MONGODB_PASSWORD: biglibon
+      SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE: admin
       EUREKA_INSTANCE_PREFER_IP_ADDRESS: false
       SPRING_APPLICATION_NAME: catalog-service
     networks:
       - biglibon-network
     deploy:
-      replicas: 3
+      replicas: 2
       restart_policy:
         condition: on-failure
     depends_on:
-      - mongodb
-      - postgresqldb
-      - eureka-server
-      - api-gateway
-      - book-service
       - library-service
-
-######## Databases #######
-  postgresqldb:
-    image: postgres:17.5
-    container_name: postgresqldb
-    restart: unless-stopped
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=biglibon
-      - POSTGRES_PASSWORD=biglibon
-      - POSTGRES_DB=biglibon
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - biglibon-network
-
-  mongodb:
-    image: mongo:8.0.10
-    container_name: mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: biglibon
-      MONGO_INITDB_ROOT_PASSWORD: biglibon
-    networks:
-      - biglibon-network
-    volumes:
-      - mongo-data:/data/db
-
-  mongo-express:
-    image: mongo-express:1.0.2-18
-    container_name: mongoui
-    restart: unless-stopped
-    ports:
-      - "8081:8081"
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: biglibon
-      ME_CONFIG_MONGODB_ADMINPASSWORD: biglibon
-      ME_CONFIG_MONGODB_SERVER: mongodb
-      ME_CONFIG_MONGODB_URL: "mongodb://biglibon:biglibon@mongodb:27017/"
-    networks:
-      - biglibon-network
-    depends_on:
-      - mongodb
-
-  pgadmin:
-    image: dpage/pgadmin4:9.4.0
-    container_name: postgresqlui
-    restart: unless-stopped
-    ports:
-      - "5050:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@biglibon.com
-      PGADMIN_DEFAULT_PASSWORD: biglibon
-    networks:
-      - biglibon-network
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - postgresqldb
-
-####### Kafka #######
-  kafka:
-    image: apache/kafka:3.9.1
-    container_name: kafka
-    restart: unless-stopped
-    ports:
-      - "9092:9092"
-      - "9093:9093"
-    environment:
-      KAFKA_KRAFT_MODE: "true"  # This enables KRaft mode in Kafka.
-      KAFKA_PROCESS_ROLES: "controller,broker" # Kafka acts as both broker and controller.
-      KAFKA_NODE_ID: 1  # A unique ID for this Kafka instance.
-      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@localhost:9093"  # Defines the controller voters.
-      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093"
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT" # All listeners use PLAINTEXT (no SSL or SASL authentication).
-      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT" # Defines which listener brokers use to communicate. Must match one of the listeners in KAFKA_LISTENERS
-      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER" # Defines which listener controllers use for metadata management. Must match a listener name in KAFKA_LISTENERS.
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://localhost:9092"
-      KAFKA_LOG_DIRS: "/var/lib/kafka/data"  # Where Kafka stores its logs.
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"  # Kafka will automatically create topics if needed.
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1  # Since we’re running one broker, one replica is enough.
-      KAFKA_LOG_RETENTION_HOURS: 168  # Keep logs for 7 days.
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0  # No delay for consumer rebalancing.
-      CLUSTER_ID: "Biglibon-Mk3OEYBSD34fcwNTJENDM2Qk"  # A unique ID for the Kafka cluster.
-    networks:
-      - biglibon-network
-    volumes:
-      - kafka-data:/var/lib/kafka/data
-
-  kafkaui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafkaui
-    restart: unless-stopped
-    ports:
-      - "9090:8080"
-    environment:
-      DYNAMIC_CONFIG_ENABLED: "true"
-      KAFKA_CLUSTERS_0_NAME: "biglibon-cluster"
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka:9092"
-    networks:
-      - biglibon-network
-    depends_on:
-      - kafka
-
-
-####### Volumes #######
-volumes:
-  postgres_data:
-  pgadmin_data:
-  mongo-data:
-  kafka-data:
 
 ####### Networks #######
 networks:

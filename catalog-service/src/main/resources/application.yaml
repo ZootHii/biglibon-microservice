@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local} # defaults to "local" if not set
   application:
     name: catalog-service
   cloud:
@@ -16,35 +18,10 @@ spring:
   jpa:
     show-sql: true
   kafka:
-    bootstrap-servers: localhost:9092
-    admin:
-      auto-create: false
-    properties:
-      enable.auto.commit: false
-      security.protocol: PLAINTEXT
-    producer:
-      acks: all
+#    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094,localhost:9095,localhost:9096,localhost:9097}
     consumer:
-      group-id: biglibon-consumer-group
-      auto-offset-reset: earliest
-
-kafka:
-  kraft:
-    mode: true
-    process-roles: "controller,broker"
-    node-id: 1
-    controller-quorum-voters: "1@localhost:9093"
-    listeners: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093"
-    listener-security-protocol-map: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT"
-    inter-broker-listener-name: "PLAINTEXT"
-    controller-listener-names: "CONTROLLER"
-    advertised-listeners: "PLAINTEXT://localhost:9092"
-    log-dirs: "/var/lib/kafka/data"
-    auto-create-topics-enable: false
-    offsets-topic-replication-factor: 1
-    log-retention-hours: 168
-    group-initial-rebalance-delay-ms: 0
-    cluster-id: "Biglibon-Mk3OEYBSD34fcwNTJENDM2Qk"
+      group-id: catalog-service-consumer-group
 
 eureka:
   instance:
@@ -68,6 +45,10 @@ logging:
     org.hibernate.type.descriptor.sql: TRACE  # Shows parameter bindings
     org.springframework.web: info
     web: debug
+    org.springframework.kafka: INFO
+    org.apache.kafka.clients.consumer: WARN
+    org.apache.kafka: INFO
+    org.apache.kafka.clients.consumer.internals: WARN
 
 management:
   endpoints:
