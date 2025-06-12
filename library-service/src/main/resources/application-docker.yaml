@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_DB_HOST:postgres-db}:${POSTGRES_DB_PORT:5432}/${POSTGRES_DB:biglibon}
+    username: ${POSTGRES_USER:biglibon}
+    password: ${POSTGRES_PASSWORD:biglibon}
+#  kafka:
+#    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka-4:9092,kafka-5:9092,kafka-6:9092,kafka-7:9092}
+#    consumer:
+#      properties:
+#        security.protocol: PLAINTEXT
+#    producer:
+#      properties:
+#        security.protocol: PLAINTEXT
+
+eureka:
+  instance:
+    prefer-ip-address: ${EUREKA_PREFER_IP:false}
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka}

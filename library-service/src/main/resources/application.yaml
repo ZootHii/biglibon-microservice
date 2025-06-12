@@ -1,13 +1,12 @@
+# based on the profile first this yaml is read then the others override this
 spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local} # defaults to "local" if not set
   application:
     name: library-service
   cloud:
     client:
       hostname: library-service
-  datasource:
-    url: jdbc:postgresql://localhost:5432/biglibon
-    username: biglibon
-    password: biglibon
   jpa:
     show-sql: true
     hibernate:
@@ -17,35 +16,45 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true # Improves SQL readability
         use_sql_comments: true # Adds comments in logs
+#  kafka:
+#    consumer:
+#      group-id: catalog-service-consumer-group
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      producer:
+#        key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#        value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 eureka:
   instance:
-    prefer-ip-address: true # overwrite on docker-compose as false
-    hostname: ${spring.cloud.client.hostname} # overwrite on docker-compose as library-service
-    instance-id: ${spring.application.name}:${random.uuid}:${eureka.instance.hostname}:${server.port}
+    hostname: library-service
+    instance-id: ${spring.application.name}:${random.uuid}:${server.port}
   client:
     enabled: true
     register-with-eureka: true
     fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka # value will get overriden if passed from external config
 
 server:
-  port: 0 # Random port assignment, overwrite on docker-compose as 8887, because can not open random port
+  port: 0
 
 logging:
   level:
     root: INFO
     org.hibernate.SQL: DEBUG  # Shows executed SQL queries
     org.hibernate.type.descriptor.sql: TRACE  # Shows parameter bindings
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
     org.springframework.web: info
     web: debug
+    org.springframework.kafka: INFO
+    org.apache.kafka.clients.consumer: WARN
+    org.apache.kafka: INFO
+    org.apache.kafka.clients.consumer.internals: WARN
 
 management:
   endpoints:
     web:
       exposure:
         include:
-          - "*"
+          - "*" # localhost:8888/library-service/actuator/health
 
 spring.cloud.service-registry.auto-registration.enabled: true
