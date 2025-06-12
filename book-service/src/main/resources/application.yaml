@@ -38,7 +38,11 @@ server:
 logging:
   level:
     root: INFO
+    org.hibernate.SQL: DEBUG  # Shows executed SQL queries
+    org.hibernate.type.descriptor.sql: TRACE  # Shows parameter bindings
     org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    org.springframework.web: info
+    web: debug
     org.springframework.kafka: INFO
     org.apache.kafka.clients.consumer: WARN
     org.apache.kafka: INFO
@@ -49,6 +53,6 @@ management:
     web:
       exposure:
         include:
-          - "*"
+          - "*" # localhost:8888/book-service/actuator/health
 
 spring.cloud.service-registry.auto-registration.enabled: true

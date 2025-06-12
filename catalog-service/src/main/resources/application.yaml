@@ -1,3 +1,4 @@
+# based on the profile first this yaml is read then the others override this
 spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local} # defaults to "local" if not set
@@ -8,41 +9,37 @@ spring:
       hostname: catalog-service
   data:
     mongodb:
-      host: localhost
-      port: 27017
-      database: biglibon
-      username: biglibon
-      password: biglibon
       authentication-database: admin
-      auto-index-creation: true
+      auto-index-creation: true # neye yarıyor bakılacak
   jpa:
     show-sql: true
   kafka:
-#    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094,localhost:9095,localhost:9096,localhost:9097}
     consumer:
       group-id: catalog-service-consumer-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      producer:
+        key-serializer: org.apache.kafka.common.serialization.StringSerializer
+        value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 eureka:
   instance:
-    prefer-ip-address: true # overwrite on docker-compose as false
-    hostname: ${spring.cloud.client.hostname} # overwrite on docker-compose as catalog-service
-    instance-id: ${spring.application.name}:${random.uuid}:${eureka.instance.hostname}:${server.port}
+    hostname: catalog-service
+    instance-id: ${spring.application.name}:${random.uuid}:${server.port}
   client:
     enabled: true
     register-with-eureka: true
     fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka # value will get overriden if passed from external config
 
 server:
-  port: 0 # Random port assignment, overwrite on docker-compose as 8887, because can not open random port
+  port: 0
 
 logging:
   level:
     root: INFO
     org.hibernate.SQL: DEBUG  # Shows executed SQL queries
     org.hibernate.type.descriptor.sql: TRACE  # Shows parameter bindings
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
     org.springframework.web: info
     web: debug
     org.springframework.kafka: INFO
@@ -55,6 +52,6 @@ management:
     web:
       exposure:
         include:
-          - "*"
+          - "*" # localhost:8888/catalog-service/actuator/health
 
 spring.cloud.service-registry.auto-registration.enabled: true

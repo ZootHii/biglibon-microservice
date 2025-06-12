@@ -8,18 +8,42 @@ spring:
       server:
         webflux:
           routes:
+            # book-service
             - id: book-service
               uri: lb://book-service
               predicates:
                 - Path=/v1/books/**
+            # book-service-actuator
+            - id: book-service-actuator
+              uri: lb://book-service
+              predicates:
+                - Path=/book-service/actuator/**
+              filters:
+                - StripPrefix=1 # delete first segment book-service for the actual service
+            # library-service
             - id: library-service
               uri: lb://library-service
               predicates:
                 - Path=/v1/libraries/**
+            # library-service-actuator
+            - id: library-service-actuator
+              uri: lb://library-service
+              predicates:
+                - Path=/library-service/actuator/**
+              filters:
+                - StripPrefix=1 # delete first segment library-service for the actual service
+            # catalog-service
             - id: catalog-service
               uri: lb://catalog-service
               predicates:
                 - Path=/v1/catalogs/**
+            # catalog-service-actuator
+            - id: catalog-service-actuator
+              uri: lb://catalog-service
+              predicates:
+                - Path=/catalog-service/actuator/**
+              filters:
+                - StripPrefix=1 # delete first segment catalog-service for the actual service
           discovery:
             locator:
               enabled: true
@@ -44,7 +68,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*" # adds all actuator endpoints (like health (shows that app is live?))
+        include: "*" # localhost:8888/actuator/health
 
 logging:
   level:
