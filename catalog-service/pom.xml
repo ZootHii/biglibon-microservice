@@ -123,6 +123,7 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-circuitbreaker-resilience4j</artifactId>
 		</dependency>
+		<!-- all common in services until here-->
 
 
 
