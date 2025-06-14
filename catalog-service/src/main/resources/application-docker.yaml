@@ -1,3 +1,4 @@
+# application-{profile}.yaml using spring.profiles.active:{profile} for us application-docker.yaml
 spring:
   data:
     mongodb:
@@ -8,12 +9,8 @@ spring:
       password: ${SPRING_DATA_MONGODB_PASSWORD:biglibon}
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka-4:9092,kafka-5:9092,kafka-6:9092,kafka-7:9092}
-    consumer:
-      properties:
-        security.protocol: PLAINTEXT
-    producer:
-      properties:
-        security.protocol: PLAINTEXT
+    properties:
+      security.protocol: PLAINTEXT
 
 eureka:
   instance:

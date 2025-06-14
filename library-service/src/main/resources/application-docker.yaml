@@ -5,12 +5,8 @@ spring:
     password: ${POSTGRES_PASSWORD:biglibon}
 #  kafka:
 #    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka-4:9092,kafka-5:9092,kafka-6:9092,kafka-7:9092}
-#    consumer:
-#      properties:
-#        security.protocol: PLAINTEXT
-#    producer:
-#      properties:
-#        security.protocol: PLAINTEXT
+#    properties:
+#      security.protocol: PLAINTEXT
 
 eureka:
   instance:

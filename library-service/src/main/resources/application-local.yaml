@@ -4,23 +4,14 @@ spring:
     username: biglibon
     password: biglibon
 #  kafka:
-#    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094,localhost:9095,localhost:9096,localhost:9097}
-#    consumer:
-#      properties:
-#        security.protocol: SASL_PLAINTEXT #${KAFKA_SECURITY_PROTOCOL:SASL_PLAINTEXT}
-#        sasl.mechanism: PLAIN #${KAFKA_SASL_MECHANISM:PLAIN}
-#        sasl.jaas.config: >
-#          org.apache.kafka.common.security.plain.PlainLoginModule required
-#          username="biglibon"
-#          password="biglibon";
-#    producer:
-#      properties:
-#        security.protocol: SASL_PLAINTEXT #${KAFKA_SECURITY_PROTOCOL:SASL_PLAINTEXT}
-#        sasl.mechanism: PLAIN #${KAFKA_SASL_MECHANISM:PLAIN}
-#        sasl.jaas.config: >
-#          org.apache.kafka.common.security.plain.PlainLoginModule required
-#          username="biglibon"
-#          password="biglibon";
+#    bootstrap-servers: localhost:9094,localhost:9095,localhost:9096,localhost:9097
+#    properties:
+#      security.protocol: SASL_PLAINTEXT
+#      sasl.mechanism: PLAIN
+#      sasl.jaas.config: |
+#        org.apache.kafka.common.security.plain.PlainLoginModule required
+#        username="biglibon"
+#        password="biglibon";
 
 eureka:
   instance:

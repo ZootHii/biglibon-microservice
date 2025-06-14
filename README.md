@@ -7,3 +7,6 @@ docker-compose -f docker-compose.yaml -f docker-compose-kafka.yaml -f docker-com
 -> remove locally build images only and volumes
 
 ALL SET ENJOY
+localhost:9090 -> kafka-ui
+localhost:8081 -> mongo-ui
+localhost:5050 -> postgres-ui
