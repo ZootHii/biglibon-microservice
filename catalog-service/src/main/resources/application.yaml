@@ -12,10 +12,9 @@ spring:
       authentication-database: admin
       auto-index-creation: true # neye yarıyor bakılacak
   jpa:
-    show-sql: true
+#    show-sql: true
   kafka:
     consumer:
-      group-id: catalog-service-consumer-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     producer:
@@ -36,12 +35,12 @@ server:
 
 logging:
   level:
-    root: INFO
-    org.hibernate.SQL: DEBUG  # Shows executed SQL queries
-    org.hibernate.type.descriptor.sql: TRACE  # Shows parameter bindings
-    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
-    org.springframework.web: info
-    web: debug
+    #    root: INFO
+    #    org.hibernate.SQL: DEBUG  # Shows executed SQL queries
+    #    org.hibernate.type.descriptor.sql: TRACE  # Shows parameter bindings
+    #    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    #    org.springframework.web: info
+    #    web: debug
     org.springframework.kafka: INFO
     org.apache.kafka.clients.consumer: WARN
     org.apache.kafka: INFO

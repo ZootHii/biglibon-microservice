@@ -15,11 +15,11 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface LibraryMapper {
 
-//    LibraryMapper INSTANCE = Mappers.getMapper(LibraryMapper.class);
 
     @Mapping(target = "books", source = "bookIds")
     LibraryDto toDto(Library library, @Context BookServiceClient bookServiceClient);
 
+    // feign client buradan kaldırılacak service içinde handle edilecek burada sadece map
     @Mapping(target = "books", source = "bookIds")
     List<LibraryDto> toDtoList(List<Library> libraryList, @Context BookServiceClient bookServiceClient);
 

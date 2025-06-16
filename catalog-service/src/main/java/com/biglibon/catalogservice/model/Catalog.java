@@ -20,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Persistent
-@CompoundIndex(def = "{'book.bookId': 1}", unique = true)
+@CompoundIndex(name = "catalog_book_index", def = "{'book.bookId': 1, 'book.isbn': 1}", unique = true)
 public class Catalog {
 
     @Id

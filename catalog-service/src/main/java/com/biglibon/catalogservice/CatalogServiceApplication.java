@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.List;
 
-@SpringBootApplication(scanBasePackages = {"com.biglibon.catalogservice","com.biglibon.sharedlibrary"})
+@SpringBootApplication(scanBasePackages = {"com.biglibon.catalogservice", "com.biglibon.sharedlibrary"})
 public class CatalogServiceApplication implements CommandLineRunner {
 
     private final CatalogRepository catalogRepository;
@@ -25,10 +25,10 @@ public class CatalogServiceApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        BookSummaryDto bookSummaryDto1 = new BookSummaryDto("68462fc5374b250b3afeff93", "Sineklerin Tanrısı", 1954, "William Golding", "Kültür Yayınları", "111");
-        BookSummaryDto bookSummaryDto2 = new BookSummaryDto("68462fc5374b250b3afeff94", "Hamlet", 1602, "William Shakespeare", "Ren Yayınları", "222");
-        LibrarySummaryDto librarySummaryDto1 = new LibrarySummaryDto(1L, "Şems-i Sivasî İl Halk Kütüphanesi", "Sivas", "(0346) 221 11 12");
-        LibrarySummaryDto librarySummaryDto2 = new LibrarySummaryDto(2L, "Milli Kütüphane", "Ankara", "(0312) 470 83 83");
+        BookSummaryDto bookSummaryDto1 = new BookSummaryDto("9998", "9998 Title", 9998, "9998 Author", "9998 Publisher", "9998isbn");
+        BookSummaryDto bookSummaryDto2 = new BookSummaryDto("9999", "9999 Title", 9999, "9999 Author", "9999 Publisher", "9999isbn");
+        LibrarySummaryDto librarySummaryDto1 = new LibrarySummaryDto(9998L, "9998 Dummy Library", "9998 City", "9998 Phone");
+        LibrarySummaryDto librarySummaryDto2 = new LibrarySummaryDto(9999L, "9999 Dummy Library", "9999 City", "9999 Phone");
         Catalog catalog1 = new Catalog(bookSummaryDto1, List.of(librarySummaryDto1));
         Catalog catalog2 = new Catalog(bookSummaryDto2, List.of(librarySummaryDto1, librarySummaryDto2));
         try {

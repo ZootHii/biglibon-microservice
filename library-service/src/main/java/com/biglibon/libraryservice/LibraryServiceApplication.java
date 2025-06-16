@@ -4,19 +4,16 @@ import com.biglibon.sharedlibrary.client.BookServiceClient;
 import com.biglibon.libraryservice.model.Library;
 import com.biglibon.libraryservice.repository.LibraryRepository;
 import com.biglibon.sharedlibrary.dto.BookDto;
-import com.biglibon.sharedlibrary.exception.GlobalExceptionHandler;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.context.annotation.Import;
 
 import java.util.List;
 import java.util.Optional;
 
-@SpringBootApplication
 @EnableFeignClients(clients = BookServiceClient.class)
-@Import(GlobalExceptionHandler.class)
+@SpringBootApplication(scanBasePackages = {"com.biglibon.libraryservice","com.biglibon.sharedlibrary"})
 public class LibraryServiceApplication implements CommandLineRunner {
 
     private final LibraryRepository libraryRepository;

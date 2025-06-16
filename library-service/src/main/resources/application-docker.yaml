@@ -3,10 +3,10 @@ spring:
     url: jdbc:postgresql://${POSTGRES_DB_HOST:postgres-db}:${POSTGRES_DB_PORT:5432}/${POSTGRES_DB:biglibon}
     username: ${POSTGRES_USER:biglibon}
     password: ${POSTGRES_PASSWORD:biglibon}
-#  kafka:
-#    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka-4:9092,kafka-5:9092,kafka-6:9092,kafka-7:9092}
-#    properties:
-#      security.protocol: PLAINTEXT
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka-4:9092,kafka-5:9092,kafka-6:9092,kafka-7:9092}
+    properties:
+      security.protocol: PLAINTEXT
 
 eureka:
   instance:

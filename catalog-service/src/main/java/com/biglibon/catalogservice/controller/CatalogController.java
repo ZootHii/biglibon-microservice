@@ -1,8 +1,8 @@
 package com.biglibon.catalogservice.controller;
 
 
-import com.biglibon.catalogservice.model.Catalog;
 import com.biglibon.catalogservice.service.CatalogService;
+import com.biglibon.sharedlibrary.dto.CatalogDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -30,7 +30,7 @@ public class CatalogController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Catalog>> getAll() {
+    public ResponseEntity<List<CatalogDto>> getAll() {
         logger.info("Catalog Service port: {}", environment.getProperty("local.server.port"));
         return ResponseEntity.ok(catalogService.findAll());
     }

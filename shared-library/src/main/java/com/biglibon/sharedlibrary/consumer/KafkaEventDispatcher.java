@@ -4,31 +4,31 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-@Component
 @Slf4j
+@Component
 public class KafkaEventDispatcher {
 
-    private final Map<String, KafkaEventHandler> handlerMap;
+    private final List<KafkaEventHandler> kafkaEventHandlers;
 
-    public KafkaEventDispatcher(List<KafkaEventHandler> handlers) {
-        this.handlerMap = handlers.stream()
-                .collect(Collectors.toMap(KafkaEventHandler::getKey, h -> h));
-        log.info("CONSUME: KafkaEventDispatcher handlers {}, handlerMap {}", handlers, handlerMap);
+    public KafkaEventDispatcher(List<KafkaEventHandler> kafkaEventHandlers) {
+        this.kafkaEventHandlers = kafkaEventHandlers;
     }
 
-    public void dispatch(String groupId, String topic, String payload) {
-        log.info("CONSUME: KafkaEventDispatcher groupId {}, topic {}, payload {}", groupId, topic, payload);
-        String key = groupId + ":" + topic;
-        KafkaEventHandler handler = handlerMap.get(key);
-        log.info("CONSUME: KafkaEventDispatcher handlerMap.getKey {}", handler);
+    public void dispatch(KafkaEvent<?> kafkaEvent) {
+        for (KafkaEventHandler kafkaEventHandler : kafkaEventHandlers) {
+            KafkaEventSubscription kafkaEventSubscription =
+                    kafkaEventHandler.getClass().getAnnotation(KafkaEventSubscription.class);
 
-        if (handler != null) {
-            handler.handle(payload);
-        } else {
-            log.error("No handler found for key: {}", key);
+            if (kafkaEventSubscription != null &&
+                    kafkaEventSubscription.topic().equals(kafkaEvent.getTopic()) &&
+                    kafkaEventSubscription.event().equals(kafkaEvent.getEvent()) &&
+                    kafkaEventSubscription.consumerGroup().equals(kafkaEvent.getConsumerGroup())) {
+
+                kafkaEventHandler.handle(kafkaEvent);
+                return;
+            }
         }
+        log.warn("No KafkaEventHandler found for KafkaEvent: {}", kafkaEvent);
     }
 }

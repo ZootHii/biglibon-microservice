@@ -8,22 +8,21 @@ spring:
     client:
       hostname: library-service
   jpa:
-    show-sql: true
+#    show-sql: true
     hibernate:
       ddl-auto: create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true # Improves SQL readability
-        use_sql_comments: true # Adds comments in logs
-#  kafka:
-#    consumer:
-#      group-id: library-service-consumer-group
-#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-#      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-#    producer:
-#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-#      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#        use_sql_comments: true # Adds comments in logs
+  kafka:
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 eureka:
   instance:
@@ -39,12 +38,12 @@ server:
 
 logging:
   level:
-    root: INFO
-    org.hibernate.SQL: DEBUG  # Shows executed SQL queries
-    org.hibernate.type.descriptor.sql: TRACE  # Shows parameter bindings
-    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
-    org.springframework.web: info
-    web: debug
+    #    root: INFO
+    #    org.hibernate.SQL: DEBUG  # Shows executed SQL queries
+    #    org.hibernate.type.descriptor.sql: TRACE  # Shows parameter bindings
+    #    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    #    org.springframework.web: info
+    #    web: debug
     org.springframework.kafka: INFO
     org.apache.kafka.clients.consumer: WARN
     org.apache.kafka: INFO

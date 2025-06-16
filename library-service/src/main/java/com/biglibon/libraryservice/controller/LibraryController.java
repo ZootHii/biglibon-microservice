@@ -1,6 +1,6 @@
 package com.biglibon.libraryservice.controller;
 
-import com.biglibon.libraryservice.dto.AddBooksToLibraryByIdsRequestDto;
+import com.biglibon.libraryservice.dto.AddBooksToLibraryByIdsRequest;
 import com.biglibon.sharedlibrary.dto.LibraryDto;
 import com.biglibon.libraryservice.service.LibraryService;
 import com.biglibon.sharedlibrary.dto.BookDto;
@@ -43,8 +43,9 @@ public class LibraryController {
     }
 
     @PostMapping("/books/add/by-ids")
-    public ResponseEntity<Void> addBookToLibrary(@RequestBody AddBooksToLibraryByIdsRequestDto addBooksToLibraryByIdsRequestDto) {
-        libraryService.addBooksToLibraryByIds(addBooksToLibraryByIdsRequestDto);
+    public ResponseEntity<Void> addBookToLibrary(
+            @RequestBody AddBooksToLibraryByIdsRequest addBooksToLibraryByIdsRequest) {
+        libraryService.addBooksToLibraryByIds(addBooksToLibraryByIdsRequest);
         return ResponseEntity.ok().build();
     }
 
