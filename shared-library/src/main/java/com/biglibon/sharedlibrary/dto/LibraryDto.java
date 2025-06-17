@@ -1,11 +1,15 @@
 package com.biglibon.sharedlibrary.dto;
 
+import lombok.Data;
+
 import java.util.List;
 
-public record LibraryDto(
-        Long id,
-        String name,
-        String city,
-        String phone,
-        List<BookDto> books) {
+@Data
+public class LibraryDto {
+    private Long id;
+    private String name;
+    private String city;
+    private String phone;
+    private List<BookDto> books;
 }
+

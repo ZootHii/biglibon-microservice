@@ -13,9 +13,7 @@ import com.biglibon.sharedlibrary.exception.LibraryNotFoundException;
 import com.biglibon.sharedlibrary.producer.KafkaEventProducer;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class LibraryService {
@@ -33,27 +31,34 @@ public class LibraryService {
     }
 
     public LibraryDto create(LibraryDto libraryDto) {
-        return libraryMapper.toDto(repository.save(libraryMapper.toEntity(libraryDto)), bookServiceClient);
+        return replaceBookIdsWithBooks(repository.save(libraryMapper.toEntity(libraryDto)));
     }
 
     public List<LibraryDto> findAll() {
-        return libraryMapper.toDtoList(repository.findAll(), bookServiceClient);
+        return repository.findAll().stream()
+                .map(this::replaceBookIdsWithBooks)
+                .toList();
     }
 
-    public void addBooksToLibraryByIds(AddBooksToLibraryByIdsRequest addBooksToLibraryByIdsRequest) {
-        Library library = repository.findById(addBooksToLibraryByIdsRequest.libraryId())
+    public void addBooksToLibraryByIds(AddBooksToLibraryByIdsRequest request) {
+        Library library = repository.findById(request.libraryId())
                 .orElseThrow(() -> new LibraryNotFoundException("Library not found"));
 
-        addBooksToLibraryByIdsRequest.bookId().forEach(bookId -> {
-            if (!library.getBookIds().contains(bookId)) {
-                library.getBookIds().add(bookId);
-            }
-        });
+        // hash used for better performance for lookup O(1)
+        Set<String> existingBookIds = new HashSet<>(library.getBookIds());
+
+        // Only add bookIds not already present
+        request.bookIds().stream()
+                .filter(existingBookIds::add)  // add returns false if element already exists > filter removes duplicates
+                .forEach(library.getBookIds()::add);
+
 
         Library updatedLibrary = repository.save(library);
 
         // change ids with books
-        LibraryDto libraryDto = libraryMapper.toDto(updatedLibrary, bookServiceClient);
+        LibraryDto libraryDto = replaceBookIdsWithBooks(updatedLibrary);
+
+        // send kafka event
         kafkaEventProducer.send(new KafkaEvent<>(
                 KafkaConstants.Library.TOPIC,
                 KafkaConstants.Library.ADD_BOOK_TO_LIBRARY_EVENT,
@@ -64,65 +69,32 @@ public class LibraryService {
     public LibraryDto findWithBooksById(Long id) {
         Library library = repository.findById(id)
                 .orElseThrow(() -> new LibraryNotFoundException("Library could not found by id:" + id));
-        return libraryMapper.toDto(library, bookServiceClient);
+
+        return replaceBookIdsWithBooks(library);
     }
 
+    public LibraryDto replaceBookIdsWithBooks(Library library) {
+        LibraryDto libraryDto = libraryMapper.toDto(library);
+
+        List<BookDto> books;
+        try {
+            books = Optional.ofNullable(bookServiceClient.getAllByIds(library.getBookIds()).getBody())
+                    .orElse(Collections.emptyList());
+        } catch (Exception e) {
+            books = Collections.emptyList();
+        }
+
+        libraryDto.setBooks(books);
+        return libraryDto;
+    }
+
+    // TESTING
     public List<BookDto> getAllBooksFromLibraryService() {
         return bookServiceClient.getAll().getBody();
     }
 
+    // TESTING
     public BookDto getBookByIdFromLibraryService(String id) {
         return bookServiceClient.getById(id).getBody();
     }
-
-
-
-
-//    public List<LibraryDto> replaceBookIdsWithBooks(List<Library> libraries) {
-//
-//        bookServiceClient.getAllByIds(libraries)
-//
-//        // Feign çağrısı ve fallback kontrol burada
-//        List<BookDto> books;
-//        try {
-//            books = Optional.ofNullable(bookServiceClient.getAllByIds(library.getBookIds()).getBody())
-//                    .orElse(Collections.emptyList());
-//        } catch (Exception e) {
-//            // fallback veya default boş liste
-//            books = Collections.emptyList();
-//        }
-//
-//        dto.setBooks(books);
-//        return dto;
-//    }
-
-//    public void addBookToLibraryByIsbn(AddBookRequestDto addBookRequestDto) {
-//        String isbn = bookServiceClient.getByIsbn(addBookRequestDto.isbn()).getBody().isbn();
-//        Library library = repository.findById(addBookRequestDto.libraryId())
-//                .orElseThrow(() -> new LibraryNotFoundException("Library could not found by id:" + addBookRequestDto.libraryId()));
-//        library.getBooks().add(isbn);
-//        repository.save(library);
-//    }
-
-
-//    public LibraryDto findAllBooksInLibraryById(Long id) {
-//        Library library = repository.findById(id)
-//                .orElseThrow(() -> new LibraryNotFoundException("Library could not found by id:" + id));
-//        library.getBooks()
-//                .forEach(isbn -> bookServiceClient.getByIsbn(isbn).getBody());
-//
-//
-//        List<String> isbnList = library.getBooks();
-//        List<BookDto> bookDtos = new ArrayList<>();
-//
-//        for (String isbn : isbnList) {
-//            bookDtos.add(bookServiceClient.getByIsbn(isbn).getBody());
-//        }
-//
-//
-//        return new LibraryDto(id, bookDtos);
-//    }
-//
-
-
 }

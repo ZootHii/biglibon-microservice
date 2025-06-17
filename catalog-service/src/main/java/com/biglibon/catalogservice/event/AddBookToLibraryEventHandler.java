@@ -44,7 +44,7 @@ public class AddBookToLibraryEventHandler implements KafkaEventHandler {
             LibraryDto libraryDto = typedKafkaEvent.getPayload();
             LibrarySummaryDto librarySummaryDto = catalogMapper.libraryDtoToLibrarySummaryDto(libraryDto);
 
-            libraryDto.books().forEach(bookDto -> {
+            libraryDto.getBooks().forEach(bookDto -> {
                 CatalogDto catalogDto = catalogService.addLibraryToBook(
                         catalogMapper.bookDtoToBookSummaryDto(bookDto),
                         librarySummaryDto
