@@ -6,8 +6,7 @@ import com.biglibon.libraryservice.service.LibraryService;
 import com.biglibon.sharedlibrary.dto.BookDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -15,12 +14,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
 @RequestMapping("/v1/libraries")
+@RestController
 @Validated
+@Slf4j
 public class LibraryController {
-
-    Logger logger = LoggerFactory.getLogger(LibraryController.class);
 
     private final LibraryService libraryService;
     private final Environment environment;
@@ -32,20 +30,20 @@ public class LibraryController {
 
     @PostMapping
     public ResponseEntity<LibraryDto> create(@RequestBody LibraryDto libraryDto) {
-        logger.info("Library created on port: {}", environment.getProperty("local.server.port"));
+        log.info("Library create on port: {}", environment.getProperty("local.server.port"));
         return ResponseEntity.ok(libraryService.create(libraryDto));
     }
 
     @GetMapping
     public ResponseEntity<List<LibraryDto>> getAll() {
-        logger.info("Library created on port: {}", environment.getProperty("local.server.port"));
+        log.info("Library getAll on port: {}", environment.getProperty("local.server.port"));
         return ResponseEntity.ok(libraryService.findAll());
     }
 
     @PostMapping("/books/add/by-ids")
     public ResponseEntity<Void> addBookToLibrary(
-            @RequestBody AddBooksToLibraryByIdsRequest addBooksToLibraryByIdsRequest) {
-        libraryService.addBooksToLibraryByIds(addBooksToLibraryByIdsRequest);
+            @RequestBody AddBooksToLibraryByIdsRequest request) {
+        libraryService.addBooksToLibraryByIds(request);
         return ResponseEntity.ok().build();
     }
 
@@ -54,19 +52,17 @@ public class LibraryController {
         return ResponseEntity.ok(libraryService.findWithBooksById(id));
     }
 
-    // For testing
+    // TESTING
     @GetMapping("/books")
     public ResponseEntity<List<BookDto>> getAllBooksFromLibraryService() {
-        logger.info("Library created on port: {}", environment.getProperty("local.server.port"));
+        log.info("Library getAllBooksFromLibraryService on port: {}", environment.getProperty("local.server.port"));
         return ResponseEntity.ok(libraryService.getAllBooksFromLibraryService());
     }
 
-    // For testing
+    // TESTING
     @GetMapping("/books/id/{id}")
     public ResponseEntity<BookDto> getBookByIdFromLibraryService(@PathVariable @NotBlank String id) {
-        logger.info("Library created on port: {}", environment.getProperty("local.server.port"));
+        log.info("Library getBookByIdFromLibraryService on port: {}", environment.getProperty("local.server.port"));
         return ResponseEntity.ok(libraryService.getBookByIdFromLibraryService(id));
     }
-
-
 }
