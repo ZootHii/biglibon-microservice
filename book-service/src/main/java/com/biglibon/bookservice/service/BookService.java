@@ -1,7 +1,6 @@
 package com.biglibon.bookservice.service;
 
 import com.biglibon.bookservice.mapper.BookMapper;
-import com.biglibon.bookservice.model.Book;
 import com.biglibon.bookservice.repository.BookRepository;
 import com.biglibon.sharedlibrary.constant.KafkaConstants;
 import com.biglibon.sharedlibrary.consumer.KafkaEvent;
@@ -19,22 +18,24 @@ public class BookService {
     private final BookMapper bookMapper;
     private final KafkaEventProducer kafkaEventProducer;
 
-    public BookService(BookRepository repository, BookMapper bookMapper, KafkaEventProducer kafkaEventProducer) {
+    public BookService(
+            BookRepository repository,
+            BookMapper bookMapper,
+            KafkaEventProducer kafkaEventProducer) {
         this.repository = repository;
         this.bookMapper = bookMapper;
         this.kafkaEventProducer = kafkaEventProducer;
     }
 
     public BookDto create(BookDto bookDto) {
-        // some checks can be performed
-        Book newBook = bookMapper.toEntity(bookDto);
-        BookDto savedBookDto = bookMapper.toDto(repository.save(newBook));
+        BookDto newBook = bookMapper.toDto(repository.save(bookMapper.toEntity(bookDto)));
+
         kafkaEventProducer.send(new KafkaEvent<>(
                 KafkaConstants.Book.TOPIC,
                 KafkaConstants.Book.ADD_BOOK_EVENT,
                 KafkaConstants.Book.PRODUCER,
-                savedBookDto));
-        return savedBookDto;
+                newBook));
+        return newBook;
     }
 
     public List<BookDto> findAllByIds(List<String> ids) {

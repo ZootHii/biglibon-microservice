@@ -37,7 +37,6 @@ public class Book {
     @LastModifiedDate
     private Instant updatedAt;
 
-
     public Book(String title, Integer publicationYear, String author, String publisher, String isbn) {
         this.title = title;
         this.publicationYear = publicationYear;
