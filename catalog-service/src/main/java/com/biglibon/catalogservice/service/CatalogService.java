@@ -8,7 +8,6 @@ import com.biglibon.sharedlibrary.dto.CatalogDto;
 import com.biglibon.sharedlibrary.dto.LibrarySummaryDto;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,57 +26,50 @@ public class CatalogService {
         return catalogMapper.toDtoList(catalogRepository.findAll());
     }
 
-
     public CatalogDto addOrUpdateBook(BookSummaryDto bookSummaryDto) {
-        Catalog createdOrUpdatedCatalog = catalogRepository
+        Catalog catalog = catalogRepository
                 .findByBookBookIdOrBookIsbn(bookSummaryDto.getBookId(), bookSummaryDto.getIsbn())
-                .map(existingCatalog -> {
+                .map(existingCatalog -> { // update book
                     existingCatalog.setBook(bookSummaryDto);
                     return catalogRepository.save(existingCatalog);
                 })
-                .orElseGet(() -> { // if there is a book in book-service but no catalog yet
-                    Catalog newCatalog = new Catalog(bookSummaryDto, new ArrayList<>());
+                // if there is a book in book-service but no catalog yet
+                .orElseGet(() -> { // create new catalog
+                    Catalog newCatalog = new Catalog(bookSummaryDto, List.of()); // immutable list directly save to DB
                     return catalogRepository.save(newCatalog);
                 });
 
-        return catalogMapper.toDto(createdOrUpdatedCatalog);
+        return catalogMapper.toDto(catalog);
     }
 
     public CatalogDto addLibraryToBook(BookSummaryDto bookSummaryDto, LibrarySummaryDto librarySummaryDto) {
-        Catalog createdOrUpdatedCatalog = catalogRepository
+        Catalog catalog = catalogRepository
                 .findByBookBookIdOrBookIsbn(bookSummaryDto.getBookId(), bookSummaryDto.getIsbn())
-                .map(existingCatalog -> {
-                    List<LibrarySummaryDto> libraries = existingCatalog.getLibraries();
-                    if (libraries == null) libraries = new ArrayList<>(); // imkansız sanırım empty list atıyoruz direkt
-
-                    boolean libraryExists = libraries
-                            .stream()
-                            .anyMatch(existingLibrary ->
-                                    existingLibrary.getLibraryId().equals(librarySummaryDto.getLibraryId()));
-
-                    if (!libraryExists) {
-                        libraries.add(librarySummaryDto);
-                    }
-
-                    existingCatalog.setLibraries(libraries);
-                    return catalogRepository.save(existingCatalog);
-                })
-                .orElseGet(() -> { // if there is a book with libraries in library-service but no catalog yet
-                    Catalog newCatalog = new Catalog(bookSummaryDto, new ArrayList<>());
-                    List<LibrarySummaryDto> libraries = newCatalog.getLibraries();
-
-                    boolean libraryExists = libraries
-                            .stream()
-                            .anyMatch(existingLibrary ->
-                                    existingLibrary.getLibraryId().equals(librarySummaryDto.getLibraryId()));
-
-                    if (!libraryExists) {
-                        libraries.add(librarySummaryDto);
-                    }
-
-                    newCatalog.setLibraries(libraries);
-                    return catalogRepository.save(newCatalog);
+                .map(existingCatalog -> updateLibraries(existingCatalog, librarySummaryDto))
+                .orElseGet(() -> {
+                    // if there is a book with libraries in library-service but no catalog yet
+                    // create new catalog and update libraries then save
+                    Catalog newCatalog = new Catalog(bookSummaryDto, new ArrayList<>()); // mutable list if there will be any change after
+                    return updateLibraries(newCatalog, librarySummaryDto);
                 });
-        return catalogMapper.toDto(createdOrUpdatedCatalog);
+        return catalogMapper.toDto(catalog);
+    }
+
+    private Catalog updateLibraries(Catalog catalog, LibrarySummaryDto librarySummaryDto) {
+        List<LibrarySummaryDto> libraries = catalog.getLibraries();
+        if (libraries == null) {
+            libraries = new ArrayList<>();
+            catalog.setLibraries(libraries);
+        }
+
+        boolean exists = libraries.stream()
+                .anyMatch(lib -> lib.getLibraryId().equals(librarySummaryDto.getLibraryId()));
+
+        if (!exists) {
+            libraries.add(librarySummaryDto);
+            catalog = catalogRepository.save(catalog);
+        }
+
+        return catalog;
     }
 }

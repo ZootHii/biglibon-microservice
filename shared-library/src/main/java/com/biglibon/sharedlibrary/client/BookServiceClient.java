@@ -28,7 +28,7 @@ public interface BookServiceClient {
         return ResponseEntity.ok(null);
     }
 
-    @GetMapping("/by-ids/{ids}") // this will work with circuitBreaker before errorDecoder
+    @GetMapping("/by-ids") // this will work with circuitBreaker before errorDecoder
     @CircuitBreaker(name = "getAllByIdsCircuitBreaker", fallbackMethod = "getAllByIdsFallback")
     ResponseEntity<List<BookDto>> getAllByIds(@RequestParam List<String> ids);
 

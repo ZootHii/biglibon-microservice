@@ -41,10 +41,9 @@ public class LibraryController {
     }
 
     @PostMapping("/books/add/by-ids")
-    public ResponseEntity<Void> addBookToLibrary(
+    public ResponseEntity<LibraryDto> addBooksToLibraryByIds(
             @RequestBody AddBooksToLibraryByIdsRequest request) {
-        libraryService.addBooksToLibraryByIds(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(libraryService.addBooksToLibraryByIds(request));
     }
 
     @GetMapping("/{id}")

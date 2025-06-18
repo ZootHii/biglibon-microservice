@@ -44,16 +44,18 @@ public class AddBookToLibraryEventHandler implements KafkaEventHandler {
             LibraryDto libraryDto = typedKafkaEvent.getPayload();
             LibrarySummaryDto librarySummaryDto = catalogMapper.libraryDtoToLibrarySummaryDto(libraryDto);
 
-            libraryDto.getBooks().forEach(bookDto -> {
-                CatalogDto catalogDto = catalogService.addLibraryToBook(
-                        catalogMapper.bookDtoToBookSummaryDto(bookDto),
-                        librarySummaryDto
-                );
-                log.info("addLibraryToBook in catalog: {}", catalogDto);
-            });
+            if (libraryDto.getBooks() != null && !libraryDto.getBooks().isEmpty()) {
+                libraryDto.getBooks().stream()
+                        .map(catalogMapper::bookDtoToBookSummaryDto)
+                        .map(bookSummaryDto ->
+                                catalogService.addLibraryToBook(bookSummaryDto, librarySummaryDto))
+                        .forEach(catalogDto ->
+                                log.info("addLibraryToBook in catalog: {}", catalogDto));
+            }
 
         } catch (Exception e) {
-            log.error("Failed to process add-book-to-library event: {}", e.getMessage(), e);
+            log.error("Failed to process event: {}, exception: {}",
+                    KafkaConstants.Library.ADD_BOOK_TO_LIBRARY_EVENT, e.getMessage(), e);
         }
     }
 }

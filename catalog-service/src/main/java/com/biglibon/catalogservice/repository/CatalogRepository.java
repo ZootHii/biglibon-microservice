@@ -8,5 +8,4 @@ import java.util.Optional;
 public interface CatalogRepository extends MongoRepository<Catalog, String> {
 
     Optional<Catalog> findByBookBookIdOrBookIsbn(String bookId, String isbn);
-
 }

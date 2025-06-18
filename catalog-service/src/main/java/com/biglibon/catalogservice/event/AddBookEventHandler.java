@@ -52,7 +52,8 @@ public class AddBookEventHandler implements KafkaEventHandler {
             log.info("addOrUpdateBook in catalog: {}", catalogDto);
 
         } catch (Exception e) {
-            log.error("Failed to process event: {}, exception: {}", KafkaConstants.Book.ADD_BOOK_EVENT, e.getMessage(), e);
+            log.error("Failed to process event: {}, exception: {}",
+                    KafkaConstants.Book.ADD_BOOK_EVENT, e.getMessage(), e);
         }
     }
 }

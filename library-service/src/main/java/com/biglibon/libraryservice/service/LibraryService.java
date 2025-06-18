@@ -40,7 +40,7 @@ public class LibraryService {
                 .toList();
     }
 
-    public void addBooksToLibraryByIds(AddBooksToLibraryByIdsRequest request) {
+    public LibraryDto addBooksToLibraryByIds(AddBooksToLibraryByIdsRequest request) {
         Library library = repository.findById(request.libraryId())
                 .orElseThrow(() -> new LibraryNotFoundException("Library not found"));
 
@@ -64,6 +64,8 @@ public class LibraryService {
                 KafkaConstants.Library.ADD_BOOK_TO_LIBRARY_EVENT,
                 KafkaConstants.Library.PRODUCER,
                 libraryDto));
+
+        return libraryDto;
     }
 
     public LibraryDto findWithBooksById(Long id) {
@@ -79,9 +81,9 @@ public class LibraryService {
         List<BookDto> books;
         try {
             books = Optional.ofNullable(bookServiceClient.getAllByIds(library.getBookIds()).getBody())
-                    .orElse(Collections.emptyList());
+                    .orElse(List.of());
         } catch (Exception e) {
-            books = Collections.emptyList();
+            books = List.of();
         }
 
         libraryDto.setBooks(books);
