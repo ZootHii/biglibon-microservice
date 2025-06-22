@@ -1,6 +1,7 @@
 package com.biglibon.bookservice.service;
 
 import com.biglibon.bookservice.mapper.BookMapper;
+import com.biglibon.bookservice.model.Book;
 import com.biglibon.bookservice.repository.BookRepository;
 import com.biglibon.sharedlibrary.constant.KafkaConstants;
 import com.biglibon.sharedlibrary.consumer.KafkaEvent;
@@ -44,6 +45,11 @@ public class BookService {
 
     public List<BookDto> findAll() {
         return bookMapper.toDtoList(repository.findAll());
+    }
+
+    public List<BookDto> findAllByIsbns(List<String> isbns) {
+        List<Book> books = repository.findAllByIsbnIn(isbns).get();
+        return bookMapper.toDtoList(books);
     }
 
     public BookDto findByIsbn(String isbn) {

@@ -42,6 +42,11 @@ public class BookController {
         return ResponseEntity.ok(service.findAllByIds(ids));
     }
 
+    @GetMapping("/by-isbns")
+    public ResponseEntity<List<BookDto>> getAllByIsbns(@RequestParam List<String> isbns) {
+        return ResponseEntity.ok(service.findAllByIsbns(isbns));
+    }
+
     @GetMapping("/isbn/{isbn}")
     public ResponseEntity<BookDto> getByIsbn(@PathVariable @NotEmpty String isbn) {
         log.info("Book getByIsbn isbn: {}", isbn);

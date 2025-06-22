@@ -6,15 +6,19 @@ import com.biglibon.libraryservice.mapper.LibraryMapper;
 import com.biglibon.libraryservice.model.Library;
 import com.biglibon.sharedlibrary.constant.KafkaConstants;
 import com.biglibon.sharedlibrary.consumer.KafkaEvent;
+import com.biglibon.sharedlibrary.dto.CreateLibraryRequest;
 import com.biglibon.sharedlibrary.dto.LibraryDto;
 import com.biglibon.libraryservice.repository.LibraryRepository;
 import com.biglibon.sharedlibrary.dto.BookDto;
 import com.biglibon.sharedlibrary.exception.LibraryNotFoundException;
 import com.biglibon.sharedlibrary.producer.KafkaEventProducer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class LibraryService {
 
@@ -30,11 +34,46 @@ public class LibraryService {
         this.kafkaEventProducer = kafkaEventProducer;
     }
 
-    public LibraryDto create(LibraryDto libraryDto) {
-        return replaceBookIdsWithBooks(repository.save(libraryMapper.toEntity(libraryDto)));
+    public LibraryDto createLibrary(CreateLibraryRequest request) {
+        // burada libraryDTO yerine direkt olarak bookid leri de gönderebilmeliyiz
+        // library oluştururken bookid yi baştan verebiliriz
+        // o yüzden libraryDTO değişecek
+        // ve burada bookid ler gerçekten book-servicete var mı bakılacak
+        // book id değilde isbn ile devam etmek daha mantıklı olur bana ne bookid den yani
+
+        List<String> originalBookIsbns = request.getBookIsbns();
+        List<BookDto> validBookDtos = getValidBooksByBookIsbns(originalBookIsbns);
+
+        Library library = libraryMapper.toEntityFromCreateLibraryRequest(request);
+        library.setBookIds(validBookDtos.stream().map(BookDto::id).toList());
+        Library savedLibrary = repository.save(library);
+
+        return new LibraryDto(savedLibrary.getId(),
+                savedLibrary.getName(),
+                savedLibrary.getCity(),
+                savedLibrary.getPhone(),
+                validBookDtos);
     }
 
-    public List<LibraryDto> findAll() {
+    private List<BookDto> getValidBooksByBookIsbns(List<String> bookIsbns) {
+        List<BookDto> validBooks = bookServiceClient.getAllByIsbns(bookIsbns).getBody();
+
+        Set<String> validBookIsbnSet = Objects.requireNonNull(validBooks).stream()
+                .map(BookDto::isbn)
+                .collect(Collectors.toSet());
+
+        List<String> invalidIsbns = bookIsbns.stream()
+                .filter(originalBookIsbn -> !validBookIsbnSet.contains(originalBookIsbn))
+                .toList();
+
+        if (!invalidIsbns.isEmpty()) {
+            // we can throw error or just notification like there are some invalid ISBNs {} proceeding with valid ISBNs.
+            log.warn("There are some invalid ISBNs {} proceeding with valid ISBNs.", invalidIsbns);
+        }
+        return validBooks;
+    }
+
+    public List<LibraryDto> getAllLibraries() {
         return repository.findAll().stream()
                 .map(this::replaceBookIdsWithBooks)
                 .toList();
@@ -98,5 +137,17 @@ public class LibraryService {
     // TESTING
     public BookDto getBookByIdFromLibraryService(String id) {
         return bookServiceClient.getById(id).getBody();
+    }
+
+    @Deprecated
+    public LibraryDto create(LibraryDto libraryDto) {
+        return replaceBookIdsWithBooks(repository.save(libraryMapper.toEntity(libraryDto)));
+    }
+
+    @Deprecated
+    public List<LibraryDto> findAll() {
+        return repository.findAll().stream()
+                .map(this::replaceBookIdsWithBooks)
+                .toList();
     }
 }

@@ -1,6 +1,7 @@
 package com.biglibon.libraryservice.controller;
 
 import com.biglibon.libraryservice.dto.AddBooksToLibraryByIdsRequest;
+import com.biglibon.sharedlibrary.dto.CreateLibraryRequest;
 import com.biglibon.sharedlibrary.dto.LibraryDto;
 import com.biglibon.libraryservice.service.LibraryService;
 import com.biglibon.sharedlibrary.dto.BookDto;
@@ -29,16 +30,30 @@ public class LibraryController {
     }
 
     @PostMapping
-    public ResponseEntity<LibraryDto> create(@RequestBody LibraryDto libraryDto) {
+    public ResponseEntity<LibraryDto> createLibrary(@RequestBody CreateLibraryRequest request) {
         log.info("Library create on port: {}", environment.getProperty("local.server.port"));
-        return ResponseEntity.ok(libraryService.create(libraryDto));
+        return ResponseEntity.ok(libraryService.createLibrary(request));
     }
 
     @GetMapping
-    public ResponseEntity<List<LibraryDto>> getAll() {
+    public ResponseEntity<List<LibraryDto>> getAllLibraries() {
         log.info("Library getAll on port: {}", environment.getProperty("local.server.port"));
-        return ResponseEntity.ok(libraryService.findAll());
+        return ResponseEntity.ok(libraryService.getAllLibraries());
     }
+
+//    @PostMapping
+//    @Deprecated
+//    public ResponseEntity<LibraryDto> create(@RequestBody LibraryDto libraryDto) {
+//        log.info("Library create on port: {}", environment.getProperty("local.server.port"));
+//        return ResponseEntity.ok(libraryService.create(libraryDto));
+//    }
+//
+//    @GetMapping
+//    @Deprecated
+//    public ResponseEntity<List<LibraryDto>> getAll() {
+//        log.info("Library getAll on port: {}", environment.getProperty("local.server.port"));
+//        return ResponseEntity.ok(libraryService.findAll());
+//    }
 
     @PostMapping("/books/add/by-ids")
     public ResponseEntity<LibraryDto> addBooksToLibraryByIds(

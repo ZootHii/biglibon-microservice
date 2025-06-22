@@ -37,6 +37,15 @@ public interface BookServiceClient {
         return ResponseEntity.ok(null);
     }
 
+    @GetMapping("/by-isbns") // this will work with circuitBreaker before errorDecoder
+    @CircuitBreaker(name = "getAllByIsbnsCircuitBreaker", fallbackMethod = "getAllByIsbnsFallback")
+    ResponseEntity<List<BookDto>> getAllByIsbns(@RequestParam List<String> isbns);
+
+    default ResponseEntity<List<BookDto>> getAllByIsbnsFallback(List<String> isbns, Exception exception) {
+        logger.info("Books not found by isbns: {}, returning default BookDto object.", isbns);
+        return ResponseEntity.ok(null);
+    }
+
     @GetMapping
     @CircuitBreaker(name = "getAll", fallbackMethod = "getAll")
     ResponseEntity<List<BookDto>> getAll();
