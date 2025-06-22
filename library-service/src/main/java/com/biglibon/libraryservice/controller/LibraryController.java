@@ -1,6 +1,7 @@
 package com.biglibon.libraryservice.controller;
 
 import com.biglibon.libraryservice.dto.AddBooksToLibraryByIdsRequest;
+import com.biglibon.libraryservice.dto.AddBooksToLibraryByIsbnsRequest;
 import com.biglibon.sharedlibrary.dto.CreateLibraryRequest;
 import com.biglibon.sharedlibrary.dto.LibraryDto;
 import com.biglibon.libraryservice.service.LibraryService;
@@ -41,30 +42,33 @@ public class LibraryController {
         return ResponseEntity.ok(libraryService.getAllLibraries());
     }
 
-//    @PostMapping
-//    @Deprecated
-//    public ResponseEntity<LibraryDto> create(@RequestBody LibraryDto libraryDto) {
-//        log.info("Library create on port: {}", environment.getProperty("local.server.port"));
-//        return ResponseEntity.ok(libraryService.create(libraryDto));
-//    }
-//
-//    @GetMapping
-//    @Deprecated
-//    public ResponseEntity<List<LibraryDto>> getAll() {
-//        log.info("Library getAll on port: {}", environment.getProperty("local.server.port"));
-//        return ResponseEntity.ok(libraryService.findAll());
-//    }
-
     @PostMapping("/books/add/by-ids")
     public ResponseEntity<LibraryDto> addBooksToLibraryByIds(
             @RequestBody AddBooksToLibraryByIdsRequest request) {
         return ResponseEntity.ok(libraryService.addBooksToLibraryByIds(request));
     }
 
+    @PostMapping("/books/add/by-isbns")
+    public ResponseEntity<LibraryDto> addBooksToLibraryByIsbns(
+            @RequestBody AddBooksToLibraryByIsbnsRequest request) {
+        return ResponseEntity.ok(libraryService.addBooksToLibraryByIsbns(request));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<LibraryDto> getWithBooksById(@PathVariable @NotNull Long id) {
         return ResponseEntity.ok(libraryService.findWithBooksById(id));
     }
+
+
+
+
+
+
+
+
+
+
+
 
     // TESTING
     @GetMapping("/books")

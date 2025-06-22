@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @FeignClient(name = "book-service", path = "/v1/books", configuration = FeignErrorDecoder.class)
@@ -28,46 +29,41 @@ public interface BookServiceClient {
         return ResponseEntity.ok(null);
     }
 
-    @GetMapping("/by-ids") // this will work with circuitBreaker before errorDecoder
-    @CircuitBreaker(name = "getAllByIdsCircuitBreaker", fallbackMethod = "getAllByIdsFallback")
-    ResponseEntity<List<BookDto>> getAllByIds(@RequestParam List<String> ids);
-
-    default ResponseEntity<List<BookDto>> getAllByIdsFallback(List<String> ids, Exception exception) {
-        logger.info("Books not found by ids: {}, returning default BookDto object.", ids);
-        return ResponseEntity.ok(null);
-    }
-
     @GetMapping("/by-isbns") // this will work with circuitBreaker before errorDecoder
     @CircuitBreaker(name = "getAllByIsbnsCircuitBreaker", fallbackMethod = "getAllByIsbnsFallback")
     ResponseEntity<List<BookDto>> getAllByIsbns(@RequestParam List<String> isbns);
 
     default ResponseEntity<List<BookDto>> getAllByIsbnsFallback(List<String> isbns, Exception exception) {
         logger.info("Books not found by isbns: {}, returning default BookDto object.", isbns);
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(new ArrayList<>());
     }
 
+    @GetMapping("/by-ids") // this will work with circuitBreaker before errorDecoder
+    @CircuitBreaker(name = "getAllByIdsCircuitBreaker", fallbackMethod = "getAllByIdsFallback")
+    ResponseEntity<List<BookDto>> getAllByIds(@RequestParam List<String> ids);
+
+    default ResponseEntity<List<BookDto>> getAllByIdsFallback(List<String> ids, Exception exception) {
+        logger.info("Books not found by ids: {}, returning default BookDto object.", ids);
+        return ResponseEntity.ok(new ArrayList<>());
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    // TESTING
     @GetMapping
-    @CircuitBreaker(name = "getAll", fallbackMethod = "getAll")
     ResponseEntity<List<BookDto>> getAll();
 
-    default ResponseEntity<List<BookDto>> getAll(Exception exception) {
-        return ResponseEntity.ok(null);
-    }
-
+    // TESTING
     @GetMapping("/id/{id}")
     ResponseEntity<BookDto> getById(@PathVariable String id);
-
-
-//    @GetMapping("/id/{id}") // this will work with error decoder there is no fallback/circuitBreaker
-//    ResponseEntity<BookDto> getById(@PathVariable String id);
-
-//    @GetMapping("/id/{id}")
-//    @CircuitBreaker(name = "getByIdCircuitBreaker", fallbackMethod = "getByIdFallback")
-//    ResponseEntity<BookDto> getById(@PathVariable String id);
-//
-//    default ResponseEntity<BookDto> getByIdFallback(String id, Exception exception) {
-//        logger.info("Book not found by id: {}, returning default BookDto object.", id);
-//        return ResponseEntity.ok(null);
-//    }
 }
 
