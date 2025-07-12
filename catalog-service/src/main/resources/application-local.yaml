@@ -16,6 +16,13 @@ spring:
         org.apache.kafka.common.security.plain.PlainLoginModule required
         username="biglibon"
         password="biglibon";
+  elasticsearch:
+    uris: https://localhost:9200
+    username: elastic
+    password: biglibon
+    ssl:
+      enabled: true
+      certificate-authorities: file:///Users/zoothii/Workspace/biglibon-microservice/.elasticsearch/certs/ca/ca.crt
 
 eureka:
   instance:

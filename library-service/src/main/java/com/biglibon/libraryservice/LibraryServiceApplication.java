@@ -4,6 +4,7 @@ import com.biglibon.sharedlibrary.client.BookServiceClient;
 import com.biglibon.libraryservice.model.Library;
 import com.biglibon.libraryservice.repository.LibraryRepository;
 import com.biglibon.sharedlibrary.dto.BookDto;
+import com.biglibon.sharedlibrary.producer.KafkaEventProducer;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,15 +14,18 @@ import java.util.List;
 import java.util.Optional;
 
 @EnableFeignClients(clients = BookServiceClient.class)
-@SpringBootApplication(scanBasePackages = {"com.biglibon.libraryservice","com.biglibon.sharedlibrary"})
+@SpringBootApplication(scanBasePackages = {"com.biglibon.libraryservice", "com.biglibon.sharedlibrary"})
 public class LibraryServiceApplication implements CommandLineRunner {
 
     private final LibraryRepository libraryRepository;
     private final BookServiceClient bookServiceClient;
+    private final KafkaEventProducer kafkaEventProducer;
 
-    public LibraryServiceApplication(LibraryRepository libraryRepository, BookServiceClient bookServiceClient) {
+    public LibraryServiceApplication(LibraryRepository libraryRepository, BookServiceClient bookServiceClient,
+                                     KafkaEventProducer kafkaEventProducer) {
         this.libraryRepository = libraryRepository;
         this.bookServiceClient = bookServiceClient;
+        this.kafkaEventProducer = kafkaEventProducer;
     }
 
     public static void main(String[] args) {
@@ -40,7 +44,8 @@ public class LibraryServiceApplication implements CommandLineRunner {
                 List.of(Optional.ofNullable(bookServiceClient.getByIsbn("444").getBody())
                         .map(BookDto::id).orElse(":D")));
         try {
-            System.out.println("Saved Libraries: " + libraryRepository.saveAll(List.of(library1, library2)));
+            List<Library> libraries = List.of(library1, library2);
+            System.out.println("Saved Libraries: " + libraryRepository.saveAll(libraries));
         } catch (Exception e) {
             System.out.println("Skipping duplicate entry: " + e.getMessage());
         }

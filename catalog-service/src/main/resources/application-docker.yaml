@@ -11,6 +11,13 @@ spring:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka-4:9092,kafka-5:9092,kafka-6:9092,kafka-7:9092}
     properties:
       security.protocol: PLAINTEXT
+  elasticsearch:
+    uris: https://es01:9200
+    username: elastic
+    password: ${ELASTIC_PASSWORD:biglibon}
+    ssl:
+      enabled: true
+      certificate-authorities: file:///catalog-service/elasticsearch/certs/ca/ca.crt
 
 eureka:
   instance:

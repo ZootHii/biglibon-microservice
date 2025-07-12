@@ -1,7 +1,7 @@
 package com.biglibon.catalogservice.event;
 
 import com.biglibon.catalogservice.mapper.CatalogMapper;
-import com.biglibon.catalogservice.service.CatalogService;
+import com.biglibon.catalogservice.service.CatalogEventService;
 import com.biglibon.sharedlibrary.constant.KafkaConstants;
 import com.biglibon.sharedlibrary.consumer.KafkaEvent;
 import com.biglibon.sharedlibrary.consumer.KafkaEventHandler;
@@ -23,15 +23,15 @@ import org.springframework.stereotype.Component;
 )
 public class AddBookEventHandler implements KafkaEventHandler {
 
-    private final CatalogService catalogService;
+    private final CatalogEventService catalogEventService;
     private final CatalogMapper catalogMapper;
     private final ObjectMapper objectMapper;
 
     public AddBookEventHandler(
-            CatalogService catalogService,
+            CatalogEventService catalogEventService,
             CatalogMapper catalogMapper,
             ObjectMapper objectMapper) {
-        this.catalogService = catalogService;
+        this.catalogEventService = catalogEventService;
         this.catalogMapper = catalogMapper;
         this.objectMapper = objectMapper;
     }
@@ -48,7 +48,7 @@ public class AddBookEventHandler implements KafkaEventHandler {
             // logic here
             BookSummaryDto bookSummaryDto = catalogMapper.bookDtoToBookSummaryDto(typedKafkaEvent.getPayload());
 
-            CatalogDto catalogDto = catalogService.addOrUpdateBook(bookSummaryDto);
+            CatalogDto catalogDto = catalogEventService.addOrUpdateBook(bookSummaryDto);
             log.info("addOrUpdateBook in catalog: {}", catalogDto);
 
         } catch (Exception e) {

@@ -29,7 +29,8 @@ public class LibraryService {
     private final LibraryMapper libraryMapper;
     private final KafkaEventProducer kafkaEventProducer;
 
-    public LibraryService(LibraryRepository repository, BookServiceClient bookServiceClient, LibraryMapper libraryMapper, KafkaEventProducer kafkaEventProducer) {
+    public LibraryService(LibraryRepository repository, BookServiceClient bookServiceClient,
+                          LibraryMapper libraryMapper, KafkaEventProducer kafkaEventProducer) {
         this.repository = repository;
         this.bookServiceClient = bookServiceClient;
         this.libraryMapper = libraryMapper;
