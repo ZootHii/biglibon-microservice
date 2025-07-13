@@ -15,9 +15,9 @@ services:
       EUREKA_INSTANCE_HOSTNAME: eureka-server
     networks:
       - biglibon-network
-    depends_on:
-      - mongo-db
-      - postgres-db
+#    depends_on:
+#      - mongo-db
+#      - postgres-db
 
   api-gateway:
     image: 'biglibon-microservice-api-gateway:latest'
@@ -57,7 +57,7 @@ services:
     networks:
       - biglibon-network
     deploy:
-      replicas: 2
+      replicas: 1
       restart_policy:
         condition: on-failure
     depends_on:
@@ -82,7 +82,7 @@ services:
     networks:
       - biglibon-network
     deploy:
-      replicas: 2
+      replicas: 1
       restart_policy:
         condition: on-failure
     depends_on:
@@ -91,8 +91,8 @@ services:
   catalog-service:
     image: 'biglibon-microservice-catalog-service:latest'
     build:
-      context: ./catalog-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: catalog-service/Dockerfile
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
@@ -104,10 +104,15 @@ services:
       SPRING_DATA_MONGODB_DATABASE: ${MONGO_DB}
       SPRING_DATA_MONGODB_USERNAME: ${MONGO_USER}
       SPRING_DATA_MONGODB_PASSWORD: ${MONGO_PASSWORD}
+      ELASTICSEARCH_URI: https://es01:9200
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD}
+    volumes:
+      - ${ELASTIC_CERTS_PATH}:/catalog-service/elasticsearch/certs:ro  # app içinde sertifika mount
     networks:
       - biglibon-network
     deploy:
-      replicas: 2
+      replicas: 1
       restart_policy:
         condition: on-failure
     depends_on:

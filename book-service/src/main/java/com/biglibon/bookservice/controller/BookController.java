@@ -2,8 +2,7 @@ package com.biglibon.bookservice.controller;
 
 import com.biglibon.bookservice.service.BookService;
 import com.biglibon.sharedlibrary.dto.BookDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -12,16 +11,14 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
-@RestController
 @RequestMapping("/v1/books")
+@RestController
 @Validated
+@Slf4j
 public class BookController {
-
-    Logger logger = LoggerFactory.getLogger(BookController.class);
 
     private final BookService service;
     private final Environment environment;
-
 
     public BookController(BookService service, Environment environment) {
         this.service = service;
@@ -30,24 +27,29 @@ public class BookController {
 
     @PostMapping
     public ResponseEntity<BookDto> create(@RequestBody BookDto bookDto) {
-        logger.info("Library created on port: {}", environment.getProperty("local.server.port"));
+        log.info("Book create on port: {}", environment.getProperty("local.server.port"));
         return ResponseEntity.ok(service.create(bookDto));
     }
 
     @GetMapping
     public ResponseEntity<List<BookDto>> getAll() {
-        logger.info("Library created on port: {}", environment.getProperty("local.server.port"));
+        log.info("Book getAll on port: {}", environment.getProperty("local.server.port"));
         return ResponseEntity.ok(service.findAll());
     }
 
-    @GetMapping("/by-ids/{ids}")
+    @GetMapping("/by-ids")
     public ResponseEntity<List<BookDto>> getAllByIds(@RequestParam List<String> ids) {
         return ResponseEntity.ok(service.findAllByIds(ids));
     }
 
+    @GetMapping("/by-isbns")
+    public ResponseEntity<List<BookDto>> getAllByIsbns(@RequestParam List<String> isbns) {
+        return ResponseEntity.ok(service.findAllByIsbns(isbns));
+    }
+
     @GetMapping("/isbn/{isbn}")
     public ResponseEntity<BookDto> getByIsbn(@PathVariable @NotEmpty String isbn) {
-        logger.info("Book requested by isbn: {}", isbn);
+        log.info("Book getByIsbn isbn: {}", isbn);
         return ResponseEntity.ok(service.findByIsbn(isbn));
     }
 

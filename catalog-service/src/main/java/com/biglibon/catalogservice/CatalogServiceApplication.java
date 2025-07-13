@@ -1,7 +1,8 @@
 package com.biglibon.catalogservice;
 
 import com.biglibon.catalogservice.model.Catalog;
-import com.biglibon.catalogservice.repository.CatalogRepository;
+import com.biglibon.catalogservice.repository.CatalogMongoRepository;
+import com.biglibon.catalogservice.service.CatalogSearchService;
 import com.biglibon.sharedlibrary.dto.BookSummaryDto;
 import com.biglibon.sharedlibrary.dto.LibrarySummaryDto;
 import org.springframework.boot.CommandLineRunner;
@@ -13,10 +14,12 @@ import java.util.List;
 @SpringBootApplication(scanBasePackages = {"com.biglibon.catalogservice", "com.biglibon.sharedlibrary"})
 public class CatalogServiceApplication implements CommandLineRunner {
 
-    private final CatalogRepository catalogRepository;
+    private final CatalogMongoRepository catalogMongoRepository;
+    private final CatalogSearchService catalogSearchService;
 
-    public CatalogServiceApplication(CatalogRepository catalogRepository) {
-        this.catalogRepository = catalogRepository;
+    public CatalogServiceApplication(CatalogMongoRepository catalogMongoRepository, CatalogSearchService catalogSearchService) {
+        this.catalogMongoRepository = catalogMongoRepository;
+        this.catalogSearchService = catalogSearchService;
     }
 
     public static void main(String[] args) {
@@ -32,8 +35,9 @@ public class CatalogServiceApplication implements CommandLineRunner {
         Catalog catalog1 = new Catalog(bookSummaryDto1, List.of(librarySummaryDto1));
         Catalog catalog2 = new Catalog(bookSummaryDto2, List.of(librarySummaryDto1, librarySummaryDto2));
         try {
-            System.out.println("Saved Catalogs: " + catalogRepository.saveAll(List.of(catalog1, catalog2)));
-
+            List<Catalog> catalogs = List.of(catalog1, catalog2);
+            System.out.println("Saved Catalogs: " + catalogMongoRepository.saveAll(catalogs));
+            catalogSearchService.saveCatalogIndices(catalogs);
         } catch (Exception e) {
             System.out.println("Skipping duplicate entry: " + e.getMessage());
         }

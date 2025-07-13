@@ -1,6 +1,7 @@
 # based on the profile first this yaml is read then the others override this
 spring:
   profiles:
+    include: elasticsearch
     active: ${SPRING_PROFILES_ACTIVE:local} # defaults to "local" if not set
   application:
     name: catalog-service
@@ -17,9 +18,13 @@ spring:
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest # offset yoksa en baştan başla startup ta gelen mesajların tüketildiğinden emin olmamız lazım
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  elasticsearch:
+    connection-timeout: 5s
+    socket-timeout: 10s
 
 eureka:
   instance:

@@ -19,22 +19,24 @@ public class BookService {
     private final BookMapper bookMapper;
     private final KafkaEventProducer kafkaEventProducer;
 
-    public BookService(BookRepository repository, BookMapper bookMapper, KafkaEventProducer kafkaEventProducer) {
+    public BookService(
+            BookRepository repository,
+            BookMapper bookMapper,
+            KafkaEventProducer kafkaEventProducer) {
         this.repository = repository;
         this.bookMapper = bookMapper;
         this.kafkaEventProducer = kafkaEventProducer;
     }
 
     public BookDto create(BookDto bookDto) {
-        // some checks can be performed
-        Book newBook = bookMapper.toEntity(bookDto);
-        BookDto savedBookDto = bookMapper.toDto(repository.save(newBook));
+        BookDto newBook = bookMapper.toDto(repository.save(bookMapper.toEntity(bookDto)));
+
         kafkaEventProducer.send(new KafkaEvent<>(
                 KafkaConstants.Book.TOPIC,
                 KafkaConstants.Book.ADD_BOOK_EVENT,
                 KafkaConstants.Book.PRODUCER,
-                savedBookDto));
-        return savedBookDto;
+                newBook));
+        return newBook;
     }
 
     public List<BookDto> findAllByIds(List<String> ids) {
@@ -43,6 +45,11 @@ public class BookService {
 
     public List<BookDto> findAll() {
         return bookMapper.toDtoList(repository.findAll());
+    }
+
+    public List<BookDto> findAllByIsbns(List<String> isbns) {
+        List<Book> books = repository.findAllByIsbnIn(isbns).get();
+        return bookMapper.toDtoList(books);
     }
 
     public BookDto findByIsbn(String isbn) {

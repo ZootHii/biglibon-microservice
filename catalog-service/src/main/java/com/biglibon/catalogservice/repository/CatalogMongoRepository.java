@@ -5,8 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;
 
-public interface CatalogRepository extends MongoRepository<Catalog, String> {
+public interface CatalogMongoRepository extends MongoRepository<Catalog, String> {
 
     Optional<Catalog> findByBookBookIdOrBookIsbn(String bookId, String isbn);
-
 }
