@@ -1,6 +1,7 @@
 package com.biglibon.catalogservice.service;
 
 import com.biglibon.catalogservice.mapper.CatalogMapper;
+import com.biglibon.catalogservice.model.Catalog;
 import com.biglibon.catalogservice.model.CatalogIndex;
 import com.biglibon.catalogservice.repository.CatalogMongoRepository;
 import com.biglibon.sharedlibrary.dto.CatalogDto;
@@ -31,7 +32,7 @@ public class CatalogRestService {
         return catalogSearchService.findAll();
     }
 
-    public List<CatalogDto> search(String text) throws IOException {
-        return catalogMapper.indexToDtoList(catalogSearchService.searchByText(text));
+    public List<Catalog> search(String text) throws IOException {
+        return catalogMapper.indexToCatalogList(catalogSearchService.searchByText(text));
     }
 }

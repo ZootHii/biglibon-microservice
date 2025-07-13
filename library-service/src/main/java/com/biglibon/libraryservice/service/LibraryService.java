@@ -136,7 +136,7 @@ public class LibraryService {
                 .orElseThrow(() -> new LibraryNotFoundException("Library could not found by id:" + libraryId));
     }
 
-    private LibraryDto replaceBookIdsWithBooks(Library library) {
+    public LibraryDto replaceBookIdsWithBooks(Library library) {
         LibraryDto libraryDto = libraryMapper.toDto(library);
 
         List<BookDto> books;

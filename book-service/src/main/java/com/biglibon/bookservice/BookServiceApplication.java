@@ -1,5 +1,6 @@
 package com.biglibon.bookservice;
 
+import com.biglibon.bookservice.mapper.BookMapper;
 import com.biglibon.bookservice.model.Book;
 import com.biglibon.bookservice.repository.BookRepository;
 import com.biglibon.sharedlibrary.constant.KafkaConstants;
@@ -16,10 +17,12 @@ public class BookServiceApplication implements CommandLineRunner {
 
     private final BookRepository bookRepository;
     private final KafkaEventProducer kafkaEventProducer;
+    private final BookMapper bookMapper;
 
-    public BookServiceApplication(BookRepository bookRepository, KafkaEventProducer kafkaEventProducer) {
+    public BookServiceApplication(BookRepository bookRepository, KafkaEventProducer kafkaEventProducer, BookMapper bookMapper) {
         this.bookRepository = bookRepository;
         this.kafkaEventProducer = kafkaEventProducer;
+        this.bookMapper = bookMapper;
     }
 
     public static void main(String[] args) {
@@ -40,7 +43,7 @@ public class BookServiceApplication implements CommandLineRunner {
                         KafkaConstants.Book.TOPIC,
                         KafkaConstants.Book.ADD_BOOK_EVENT,
                         KafkaConstants.Book.PRODUCER,
-                        book));
+                        bookMapper.toDto(book)));
             });
         } catch (Exception e) {
             System.out.println("Skipping duplicate entry: " + e.getMessage());

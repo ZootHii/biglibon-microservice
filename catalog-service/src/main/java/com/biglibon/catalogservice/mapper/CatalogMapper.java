@@ -33,11 +33,11 @@ public interface CatalogMapper {
 
     List<Catalog> indexToCatalogList(List<CatalogIndex> catalogIndices);
 
-    CatalogIndex dtoToIndex(CatalogDto catalogDto);
+//    CatalogIndex dtoToIndex(CatalogDto catalogDto);
 
-    List<CatalogIndex> dtoToIndexList(List<CatalogDto> catalogDtos);
+//    List<CatalogIndex> dtoToIndexList(List<CatalogDto> catalogDtos);
 
-    CatalogDto indexToDto(CatalogIndex catalogIndex);
+//    CatalogDto indexToDto(CatalogIndex catalogIndex);
 
-    List<CatalogDto> indexToDtoList(List<CatalogIndex> catalogIndices);
+//    List<CatalogDto> indexToDtoList(List<CatalogIndex> catalogIndices);
 }

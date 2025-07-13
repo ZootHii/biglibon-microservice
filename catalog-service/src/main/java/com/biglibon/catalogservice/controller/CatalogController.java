@@ -1,6 +1,7 @@
 package com.biglibon.catalogservice.controller;
 
 
+import com.biglibon.catalogservice.model.Catalog;
 import com.biglibon.catalogservice.model.CatalogIndex;
 import com.biglibon.catalogservice.service.CatalogRestService;
 import com.biglibon.sharedlibrary.dto.CatalogDto;
@@ -43,7 +44,7 @@ public class CatalogController {
     }
 
     @GetMapping("/search/{text}")
-    public ResponseEntity<List<CatalogDto>> search(@PathVariable @NotEmpty String text) throws IOException {
+    public ResponseEntity<List<Catalog>> search(@PathVariable @NotEmpty String text) throws IOException {
         log.info("Catalog search port: {}", environment.getProperty("local.server.port"));
         return ResponseEntity.ok(catalogRestService.search(text));
     }
