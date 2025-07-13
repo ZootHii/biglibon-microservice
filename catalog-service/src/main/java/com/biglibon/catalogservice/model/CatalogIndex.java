@@ -44,14 +44,20 @@ public class CatalogIndex {
         @Field(type = FieldType.Keyword)
         private String bookId;
 
-        @Field(type = FieldType.Keyword)
-        private String isbn;
-
         @Field(type = FieldType.Text)
         private String title;
 
         @Field(type = FieldType.Text)
+        private String publicationYear;
+
+        @Field(type = FieldType.Text)
         private String author;
+
+        @Field(type = FieldType.Text)
+        private String publisher;
+
+        @Field(type = FieldType.Keyword)
+        private String isbn;
     }
 
     @Data
@@ -64,7 +70,10 @@ public class CatalogIndex {
         @Field(type = FieldType.Text)
         private String name;
 
-        @Field(type = FieldType.Keyword)
-        private String location;
+        @Field(type = FieldType.Text)
+        private String city;
+
+        @Field(type = FieldType.Text)
+        private String phone;
     }
 }

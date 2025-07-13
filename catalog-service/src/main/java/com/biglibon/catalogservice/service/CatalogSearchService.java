@@ -43,7 +43,7 @@ public class CatalogSearchService {
         Query libraryNestedQuery = NestedQuery.of(n -> n
                 .path("libraries")
                 .query(MultiMatchQuery.of(m -> m
-                        .fields("libraries.name", "libraries.location")
+                        .fields("libraries.name", "libraries.city", "libraries.phone")
                         .query(text)
                         .type(TextQueryType.BestFields)
                 )._toQuery())
