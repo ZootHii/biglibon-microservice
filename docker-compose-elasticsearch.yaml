@@ -239,7 +239,7 @@
       driver_opts:
         type: none
         o: bind
-        device: /Users/zoothii/Workspace/biglibon-microservice/.elasticsearch/certs
+        device: ${ELASTIC_CERTS_PATH}
     esdata01:
     esdata02:
     esdata03:

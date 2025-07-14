@@ -33,5 +33,11 @@ build/
 .vscode/
 
 
-
-.elasticsearch
+### Elasticsearch CERTS ###
+.elasticsearch/certs/ca
+.elasticsearch/certs/es01
+.elasticsearch/certs/es02
+.elasticsearch/certs/es03
+.elasticsearch/certs/ca.zip
+.elasticsearch/certs/certs.zip
+.elasticsearch/certs/instances.yml
