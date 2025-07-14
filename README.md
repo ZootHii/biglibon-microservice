@@ -23,7 +23,9 @@ docker-compose -f docker-compose.yaml build --no-cache
 docker-compose -f docker-compose.yaml up -d
 docker-compose -f docker-compose.yaml down --rmi local -v
 
-docker-compose -f docker-compose.yaml -f docker-compose-kafka.yaml -f docker-compose-database.yaml -f docker-compose-elasticsearch.yaml down --rmi local -v
+Environment Setup
+docker-compose -f docker-compose-kafka.yaml -f docker-compose-database.yaml -f docker-compose-elasticsearch.yaml up -d
+docker-compose -f docker-compose-kafka.yaml -f docker-compose-database.yaml -f docker-compose-elasticsearch.yaml down --rmi local -v
 
 
 ALL SET ENJOY
