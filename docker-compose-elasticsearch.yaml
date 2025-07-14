@@ -1,6 +1,6 @@
   #https://www.elastic.co/docs/deploy-manage/deploy/self-managed/install-elasticsearch-docker-compose
   services:
-    es-setup:
+    elastic-setup:
       image: elasticsearch:9.0.2
       volumes:
         - certs:/usr/share/elasticsearch/config/certs
@@ -25,21 +25,21 @@
             echo "Creating certs";
             echo -ne \
             "instances:\n"\
-            "  - name: es01\n"\
+            "  - name: elastic-1\n"\
             "    dns:\n"\
-            "      - es01\n"\
+            "      - elastic-1\n"\
             "      - localhost\n"\
             "    ip:\n"\
             "      - 127.0.0.1\n"\
-            "  - name: es02\n"\
+            "  - name: elastic-2\n"\
             "    dns:\n"\
-            "      - es02\n"\
+            "      - elastic-2\n"\
             "      - localhost\n"\
             "    ip:\n"\
             "      - 127.0.0.1\n"\
-            "  - name: es03\n"\
+            "  - name: elastic-3\n"\
             "    dns:\n"\
-            "      - es03\n"\
+            "      - elastic-3\n"\
             "      - localhost\n"\
             "    ip:\n"\
             "      - 127.0.0.1\n"\
@@ -52,42 +52,42 @@
           find . -type d -exec chmod 750 \{\} \;;
           find . -type f -exec chmod 640 \{\} \;;
           echo "Waiting for Elasticsearch availability";
-          until curl -s --cacert config/certs/ca/ca.crt https://es01:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
+          until curl -s --cacert config/certs/ca/ca.crt https://elastic-1:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
           echo "Setting kibana_system password";
-          until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+          until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://elastic-1:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
           echo "All done!";
         '
       healthcheck:
-        test: ["CMD-SHELL", "[ -f config/certs/es01/es01.crt ]"]
+        test: ["CMD-SHELL", "[ -f config/certs/elastic-1/elastic-1.crt ]"]
         interval: 1s
         timeout: 5s
         retries: 120
 
-    es01:
+    elastic-1:
       image: elasticsearch:9.0.2
-      container_name: es01
+      container_name: elastic-1
       volumes:
         - certs:/usr/share/elasticsearch/config/certs
-        - esdata01:/usr/share/elasticsearch/data
+        - elastic-1-data:/usr/share/elasticsearch/data
       ports:
         - ${ES_PORT}:9200
       networks:
         - biglibon-network
       environment:
-        - node.name=es01
+        - node.name=elastic-1
         - cluster.name=${CLUSTER_NAME}
-        - cluster.initial_master_nodes=es01,es02,es03
-        - discovery.seed_hosts=es02,es03
+        - cluster.initial_master_nodes=elastic-1,elastic-2,elastic-3
+        - discovery.seed_hosts=elastic-2,elastic-3
         - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
         - bootstrap.memory_lock=true
         - xpack.security.enabled=true
         - xpack.security.http.ssl.enabled=true
-        - xpack.security.http.ssl.key=certs/es01/es01.key
-        - xpack.security.http.ssl.certificate=certs/es01/es01.crt
+        - xpack.security.http.ssl.key=certs/elastic-1/elastic-1.key
+        - xpack.security.http.ssl.certificate=certs/elastic-1/elastic-1.crt
         - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
         - xpack.security.transport.ssl.enabled=true
-        - xpack.security.transport.ssl.key=certs/es01/es01.key
-        - xpack.security.transport.ssl.certificate=certs/es01/es01.crt
+        - xpack.security.transport.ssl.key=certs/elastic-1/elastic-1.key
+        - xpack.security.transport.ssl.certificate=certs/elastic-1/elastic-1.crt
         - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
         - xpack.security.transport.ssl.verification_mode=certificate
         - xpack.license.self_generated.type=${LICENSE}
@@ -107,32 +107,32 @@
         timeout: 10s
         retries: 120
       depends_on:
-        es-setup:
+        elastic-setup:
           condition: service_healthy
 
-    es02:
+    elastic-2:
       image: elasticsearch:9.0.2
-      container_name: es02
+      container_name: elastic-2
       volumes:
         - certs:/usr/share/elasticsearch/config/certs
-        - esdata02:/usr/share/elasticsearch/data
+        - elastic-2-data:/usr/share/elasticsearch/data
       networks:
         - biglibon-network
       environment:
-        - node.name=es02
+        - node.name=elastic-2
         - cluster.name=${CLUSTER_NAME}
-        - cluster.initial_master_nodes=es01,es02,es03
-        - discovery.seed_hosts=es01,es03
+        - cluster.initial_master_nodes=elastic-1,elastic-2,elastic-3
+        - discovery.seed_hosts=elastic-1,elastic-3
         - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
         - bootstrap.memory_lock=true
         - xpack.security.enabled=true
         - xpack.security.http.ssl.enabled=true
-        - xpack.security.http.ssl.key=certs/es02/es02.key
-        - xpack.security.http.ssl.certificate=certs/es02/es02.crt
+        - xpack.security.http.ssl.key=certs/elastic-2/elastic-2.key
+        - xpack.security.http.ssl.certificate=certs/elastic-2/elastic-2.crt
         - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
         - xpack.security.transport.ssl.enabled=true
-        - xpack.security.transport.ssl.key=certs/es02/es02.key
-        - xpack.security.transport.ssl.certificate=certs/es02/es02.crt
+        - xpack.security.transport.ssl.key=certs/elastic-2/elastic-2.key
+        - xpack.security.transport.ssl.certificate=certs/elastic-2/elastic-2.crt
         - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
         - xpack.security.transport.ssl.verification_mode=certificate
         - xpack.license.self_generated.type=${LICENSE}
@@ -152,31 +152,31 @@
         timeout: 10s
         retries: 120
       depends_on:
-        - es01
+        - elastic-1
 
-    es03:
+    elastic-3:
       image: elasticsearch:9.0.2
-      container_name: es03
+      container_name: elastic-3
       volumes:
         - certs:/usr/share/elasticsearch/config/certs
-        - esdata03:/usr/share/elasticsearch/data
+        - elastic-3-data:/usr/share/elasticsearch/data
       networks:
         - biglibon-network
       environment:
-        - node.name=es03
+        - node.name=elastic-3
         - cluster.name=${CLUSTER_NAME}
-        - cluster.initial_master_nodes=es01,es02,es03
-        - discovery.seed_hosts=es01,es02
+        - cluster.initial_master_nodes=elastic-1,elastic-2,elastic-3
+        - discovery.seed_hosts=elastic-1,elastic-2
         - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
         - bootstrap.memory_lock=true
         - xpack.security.enabled=true
         - xpack.security.http.ssl.enabled=true
-        - xpack.security.http.ssl.key=certs/es03/es03.key
-        - xpack.security.http.ssl.certificate=certs/es03/es03.crt
+        - xpack.security.http.ssl.key=certs/elastic-3/elastic-3.key
+        - xpack.security.http.ssl.certificate=certs/elastic-3/elastic-3.crt
         - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
         - xpack.security.transport.ssl.enabled=true
-        - xpack.security.transport.ssl.key=certs/es03/es03.key
-        - xpack.security.transport.ssl.certificate=certs/es03/es03.crt
+        - xpack.security.transport.ssl.key=certs/elastic-3/elastic-3.key
+        - xpack.security.transport.ssl.certificate=certs/elastic-3/elastic-3.crt
         - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
         - xpack.security.transport.ssl.verification_mode=certificate
         - xpack.license.self_generated.type=${LICENSE}
@@ -196,21 +196,21 @@
         timeout: 10s
         retries: 120
       depends_on:
-        - es02
+        - elastic-2
 
     kibana:
       image: kibana:9.0.2
       container_name: kibana
       volumes:
         - certs:/usr/share/kibana/config/certs
-        - kibanadata:/usr/share/kibana/data
+        - kibana-data:/usr/share/kibana/data
       ports:
         - ${KIBANA_PORT}:5601
       networks:
         - biglibon-network
       environment:
         - SERVERNAME=kibana
-        - ELASTICSEARCH_HOSTS=https://es01:9200
+        - ELASTICSEARCH_HOSTS=https://elastic-1:9200
         - ELASTICSEARCH_USERNAME=kibana_system
         - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
         - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
@@ -225,11 +225,11 @@
         timeout: 10s
         retries: 120
       depends_on:
-        es01:
+        elastic-1:
           condition: service_healthy
-        es02:
+        elastic-2:
           condition: service_healthy
-        es03:
+        elastic-3:
           condition: service_healthy
 
   ####### Volumes #######
@@ -240,10 +240,10 @@
         type: none
         o: bind
         device: ${ELASTIC_CERTS_PATH}
-    esdata01:
-    esdata02:
-    esdata03:
-    kibanadata:
+    elastic-1-data:
+    elastic-2-data:
+    elastic-3-data:
+    kibana-data:
 
   ####### Networks #######
   networks:

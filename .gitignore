@@ -35,9 +35,9 @@ build/
 
 ### Elasticsearch CERTS ###
 .elasticsearch/certs/ca
-.elasticsearch/certs/es01
-.elasticsearch/certs/es02
-.elasticsearch/certs/es03
+.elasticsearch/certs/elastic-1
+.elasticsearch/certs/elastic-2
+.elasticsearch/certs/elastic-3
 .elasticsearch/certs/ca.zip
 .elasticsearch/certs/certs.zip
 .elasticsearch/certs/instances.yml

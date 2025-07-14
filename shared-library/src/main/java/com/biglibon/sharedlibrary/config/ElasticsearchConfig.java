@@ -30,7 +30,7 @@ import java.time.Instant;
 public class ElasticsearchConfig {
 
     @Value("${spring.elasticsearch.uris}")
-    private String elasticUris; // örn: https://es01:9200
+    private String elasticUris;
 
     @Value("${spring.elasticsearch.username}")
     private String username;

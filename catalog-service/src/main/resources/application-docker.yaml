@@ -12,8 +12,8 @@ spring:
     properties:
       security.protocol: PLAINTEXT
   elasticsearch:
-    uris: https://es01:9200
-    username: elastic
+    uris: ${ELASTICSEARCH_URI:https://elastic-1:9200}
+    username: ${ELASTICSEARCH_USERNAME:elastic}
     password: ${ELASTIC_PASSWORD:biglibon}
     ssl:
       enabled: true
