@@ -4,6 +4,7 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.annotation.PostConstruct;
 import org.apache.http.HttpHost;
@@ -23,10 +24,13 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
-import java.time.Instant;
 
 @Configuration
 @Profile("elasticsearch")
+// it will work only microservices which has elasticsearch profile on application.yaml
+// spring:
+//  profiles:
+//    include: elasticsearch
 public class ElasticsearchConfig {
 
     @Value("${spring.elasticsearch.uris}")
@@ -45,14 +49,21 @@ public class ElasticsearchConfig {
 
     @PostConstruct
     public void init() {
+        // Read CA cert from .elasticsearch/certs path
         try (InputStream caInput = caCert.getInputStream()) {
+            // Create CertificateFactory in X.509 standard
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
+
+            // Create CA Certificate using CertificateFactory and CA in .elasticsearch/certs path
             Certificate ca = cf.generateCertificate(caInput);
 
+            // Create trustStore by using JVM default KeyStore
             KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            // Create empty KeyStore
             trustStore.load(null, null);
-            trustStore.setCertificateEntry("ca-cert", ca);
 
+            // Set elasticsearch CA cert to JVM trust store so JVM can recognize otherwise app will refuse elasticsearch
+            trustStore.setCertificateEntry("ca-cert", ca);
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(trustStore);
 
@@ -64,33 +75,28 @@ public class ElasticsearchConfig {
     }
 
     @Bean(destroyMethod = "close")
-    public RestClient restClient() {
+    public ElasticsearchClient elasticsearchClient() {
         HttpHost host = HttpHost.create(elasticUris);
 
         BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(AuthScope.ANY,
                 new UsernamePasswordCredentials(username, password));
 
-        return RestClient.builder(host)
+        RestClient restClient = RestClient.builder(host)
                 .setHttpClientConfigCallback(httpClientBuilder ->
                         httpClientBuilder
                                 .setSSLContext(sslContext)
                                 .setDefaultCredentialsProvider(credentialsProvider)
                 )
                 .build();
-    }
 
-    @Bean
-    public ElasticsearchClient elasticsearchClient(RestClient restClient) {
-        // ObjectMapper'a JavaTimeModule ekliyoruz Instant parse etme sorunu için jackson-datatype-jsr310
-        ObjectMapper objectMapper = new ObjectMapper();
-        JavaTimeModule javaTimeModule = new JavaTimeModule();
+        // Add JavaTimeModule to ObjectMapper to fix Instant parse issue - jackson-datatype-jsr310
+        ObjectMapper objectMapper = JsonMapper.builder()
+                .addModule(new JavaTimeModule())
+                .build();
 
-        objectMapper.registerModule(javaTimeModule);
-
-        JacksonJsonpMapper jacksonJsonpMapper = new JacksonJsonpMapper(objectMapper);
-
-        RestClientTransport transport = new RestClientTransport(restClient, jacksonJsonpMapper);
+        // Create the transport with a Jackson mapper which maps classes to json
+        RestClientTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper(objectMapper));
         return new ElasticsearchClient(transport);
     }
 }
