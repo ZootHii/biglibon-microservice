@@ -1,0 +1,527 @@
+{
+	"info": {
+		"_postman_id": "53d99263-4b0c-4503-a0c2-fabbae9a36e1",
+		"name": "Microservice-biglibon",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14628789",
+		"_collection_link": "https://orange-meteor-567861.postman.co/workspace/Workspace~3a129daf-a44a-42d7-a9e1-72c4df5f9455/collection/14628789-53d99263-4b0c-4503-a0c2-fabbae9a36e1?action=share&source=collection_link&creator=14628789"
+	},
+	"item": [
+		{
+			"name": "book",
+			"item": [
+				{
+					"name": "createBook v1/books",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Gurur ve Önyargı\",\r\n    \"publicationYear\": 1813,\r\n    \"author\": \"Jane Austen\",\r\n    \"publisher\": \"İş Bankası\",\r\n    \"isbn\": \"531765\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8888/v1/books",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST v1/books MOCK TEST",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"{{title}}\",\n    \"publicationYear\": {{publicationYear}},\n    \"author\": \"{{author}}\",\n    \"publisher\": \"{{publisher}}\",\n    \"isbn\": \"{{isbn}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8888/v1/books",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET  v1/books/id/{id}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/v1/books/id/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"books",
+								"id",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET v1/books/isbn/{isbn}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/v1/books/isbn/222",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"books",
+								"isbn",
+								"222"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllBooks v1/books",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/v1/books",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET v1/books Copy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://172.18.0.1:38059/v1/books",
+							"protocol": "http",
+							"host": [
+								"172",
+								"18",
+								"0",
+								"1"
+							],
+							"port": "38059",
+							"path": [
+								"v1",
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET v1/books/by-ids/ids/{ids}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/v1/books/by-ids?ids=1,2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"books",
+								"by-ids"
+							],
+							"query": [
+								{
+									"key": "ids",
+									"value": "1,2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET v1/books/by-isbns",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/v1/books/by-isbns?isbns=111,222",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"books",
+								"by-isbns"
+							],
+							"query": [
+								{
+									"key": "isbns",
+									"value": "111,222"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "library",
+			"item": [
+				{
+					"name": "createLibrary v1/libraries",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\"name\": \"Süleymaniye Yazma Eser Kütüphanesi\",\r\n\"city\": \"İstanbul\",\r\n\"phone\": \"(0212) 520 64 60\",\r\n\"bookIsbns\": [\"111\",\"222\",\"333\",\"XD\",\"531765\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8888/v1/libraries",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"libraries"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET v1/libraries/id/{id}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/v1/libraries/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"libraries",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllLibraries v1/libraries",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/v1/libraries",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"libraries"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET v1/libraries",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/v1/libraries",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"libraries"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllBooksFromLibrary v1/libraries/books",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/v1/libraries/books",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"libraries",
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET v1/libraries/books/id/{id}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/v1/libraries/books/id/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"libraries",
+								"books",
+								"id",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addBooksToLibraryByIsbns v1/libraries/books/add/by-isbns",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"libraryId\": \"1\",\r\n    \"bookIsbns\": [\"111\",\"222\",\"333\",\"XD\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8888/v1/libraries/books/add/by-isbns",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"libraries",
+								"books",
+								"add",
+								"by-isbns"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addBooksToLibraryByIds v1/libraries/books/add/by-ids",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"libraryId\": \"3\",\r\n    \"bookIds\": [\"68529e6ae262467701ecfcb2\", \"68529e6ae262467701ecfcb3\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8888/v1/libraries/books/add/by-ids",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"libraries",
+								"books",
+								"add",
+								"by-ids"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "catalog",
+			"item": [
+				{
+					"name": "getAllCatalogs v1/catalogs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/v1/catalogs",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"catalogs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "search v1/catalogs/search/{text}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/v1/catalogs/search/wil",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"catalogs",
+								"search",
+								"wil"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getlAllCatalogIndex v1/catalogs/index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/v1/catalogs/index",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"v1",
+								"catalogs",
+								"index"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "GET API Gateway Actuator Health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8888/actuator/health",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"actuator",
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET Book Service Actuator Health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8888/book-service/actuator/health",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"book-service",
+						"actuator",
+						"health"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

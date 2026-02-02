@@ -14,8 +14,10 @@ public class KafkaConfig {
     @Bean
     public NewTopic bookEventsTopic() {
         return TopicBuilder.name(KafkaConstants.Book.TOPIC)
-                .partitions(2) // since we have 2 microservice replicas each service can register one partition
-                .replicas(4) // since we are running 4 brokers we can have copy of the topic in each broker more redundancy
+                // Since we have 2 microservice replicas each service can register one partition
+                .partitions(2)
+                // Since we are running 4 brokers we can have copy of the topic in each broker for more redundancy
+                .replicas(4)
                 .build();
     }
 

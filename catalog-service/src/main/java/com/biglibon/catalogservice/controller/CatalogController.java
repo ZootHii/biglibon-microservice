@@ -43,6 +43,7 @@ public class CatalogController {
         return ResponseEntity.ok(catalogRestService.findAllCatalogIndex());
     }
 
+    // search request dto gerekli
     @GetMapping("/search/{text}")
     public ResponseEntity<List<Catalog>> search(@PathVariable @NotEmpty String text) throws IOException {
         log.info("Catalog search port: {}", environment.getProperty("local.server.port"));

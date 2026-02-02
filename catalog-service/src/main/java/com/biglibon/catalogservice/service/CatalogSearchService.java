@@ -33,26 +33,27 @@ public class CatalogSearchService {
     }
 
     public List<CatalogIndex> searchByText(String text) throws IOException {
-        // Multi Match Query
+        // Multi Match Query // query util. @Utiility Class altına taşınabilir
         Query bookQuery = MultiMatchQuery.of(m -> m
-                .fields("book.title", "book.author", "book.isbn")
+                .fields("book.title", "book.author", "book.publisher")
                 .query(text)
-                .type(TextQueryType.BestFields)
+                .type(TextQueryType.CrossFields)
         )._toQuery();
 
         Query libraryNestedQuery = NestedQuery.of(n -> n
                 .path("libraries")
                 .query(MultiMatchQuery.of(m -> m
-                        .fields("libraries.name", "libraries.city", "libraries.phone")
+                        .fields("libraries.name", "libraries.city")
                         .query(text)
                         .type(TextQueryType.BestFields)
                 )._toQuery())
-                .scoreMode(ChildScoreMode.Avg)
+                .scoreMode(ChildScoreMode.Max)
         )._toQuery();
 
         Query combinedQuery = BoolQuery.of(b -> b
                 .should(bookQuery)
                 .should(libraryNestedQuery)
+                .minimumShouldMatch("1")
         )._toQuery();
 
         SearchRequest request = SearchRequest.of(s -> s
@@ -62,7 +63,10 @@ public class CatalogSearchService {
 
         SearchResponse<CatalogIndex> response = client.search(request, CatalogIndex.class);
 
-        return response.hits().hits().stream()
+        return response
+                .hits()
+                .hits()
+                .stream()
                 .map(Hit::source)
                 .collect(Collectors.toList());
     }

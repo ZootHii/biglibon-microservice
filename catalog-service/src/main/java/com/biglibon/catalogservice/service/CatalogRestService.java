@@ -32,6 +32,7 @@ public class CatalogRestService {
         return catalogSearchService.findAll();
     }
 
+    // catalog a map etmenin bi anlamı olmayabilir iptal ederiz bunu
     public List<Catalog> search(String text) throws IOException {
         return catalogMapper.indexToCatalogList(catalogSearchService.searchByText(text));
     }
