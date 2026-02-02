@@ -41,3 +41,6 @@ build/
 .elasticsearch/certs/ca.zip
 .elasticsearch/certs/certs.zip
 .elasticsearch/certs/instances.yml
+
+### Postman Collection ###
+.postman
