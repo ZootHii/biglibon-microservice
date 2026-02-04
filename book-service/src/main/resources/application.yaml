@@ -10,9 +10,10 @@ spring:
   data:
     mongodb:
       authentication-database: admin
-      auto-index-creation: true # neye yarıyor bakılacak
+      auto-index-creation: true # creates defined indexes
   jpa:
-#    show-sql: true
+    enabled: false
+  #    show-sql: true
   kafka:
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -48,6 +49,9 @@ logging:
     org.apache.kafka.clients.consumer.internals: WARN
 
 management:
+  health:
+    elasticsearch:
+      enabled: false
   endpoints:
     web:
       exposure:

@@ -8,14 +8,14 @@ spring:
     client:
       hostname: library-service
   jpa:
-#    show-sql: true
+    #    show-sql: true
     hibernate:
       ddl-auto: create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true # Improves SQL readability
-#        use_sql_comments: true # Adds comments in logs
+  #        use_sql_comments: true # Adds comments in logs
   kafka:
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -50,6 +50,11 @@ logging:
     org.apache.kafka.clients.consumer.internals: WARN
 
 management:
+  health:
+    elasticsearch:
+      enabled: false
+    mongo:
+      enabled: false
   endpoints:
     web:
       exposure:

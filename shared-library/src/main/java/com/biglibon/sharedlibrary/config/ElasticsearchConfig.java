@@ -77,21 +77,24 @@ public class ElasticsearchConfig {
     }
 
     @Bean(destroyMethod = "close")
-    public ElasticsearchClient elasticsearchClient() {
+    public RestClient restClient() {
         HttpHost host = HttpHost.create(elasticUris);
 
         BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(AuthScope.ANY,
                 new UsernamePasswordCredentials(username, password));
 
-        RestClient restClient = RestClient.builder(host)
+        return RestClient.builder(host)
                 .setHttpClientConfigCallback(httpClientBuilder ->
                         httpClientBuilder
                                 .setSSLContext(sslContext)
                                 .setDefaultCredentialsProvider(credentialsProvider)
                 )
                 .build();
+    }
 
+    @Bean(destroyMethod = "close")
+    public ElasticsearchClient elasticsearchClient(RestClient restClient) {
         // Add JavaTimeModule to ObjectMapper to fix Instant parse issue - jackson-datatype-jsr310
         ObjectMapper objectMapper = JsonMapper.builder()
                 .addModule(new JavaTimeModule())
