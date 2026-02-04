@@ -6,6 +6,7 @@ import com.biglibon.bookservice.repository.BookRepository;
 import com.biglibon.sharedlibrary.constant.KafkaConstants;
 import com.biglibon.sharedlibrary.consumer.KafkaEvent;
 import com.biglibon.sharedlibrary.dto.BookDto;
+import com.biglibon.sharedlibrary.exception.BookDuplicateException;
 import com.biglibon.sharedlibrary.exception.BookNotFoundException;
 import com.biglibon.sharedlibrary.producer.KafkaEventProducer;
 import org.junit.jupiter.api.Test;
@@ -21,8 +22,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
@@ -55,6 +55,7 @@ class BookServiceTest {
 
         BookDto savedDto = new BookDto("book-1", "Clean Code", 2008, "Robert C. Martin", "Prentice Hall", "isbn-1", now, now);
 
+        when(repository.findByIsbn("isbn-1")).thenReturn(Optional.empty());
         when(bookMapper.toEntity(bookDto)).thenReturn(book);
         when(repository.save(book)).thenReturn(savedBook);
         when(bookMapper.toDto(savedBook)).thenReturn(savedDto);
@@ -69,6 +70,21 @@ class BookServiceTest {
         assertThat(event.getEvent()).isEqualTo(KafkaConstants.Book.ADD_BOOK_EVENT);
         assertThat(event.getProducer()).isEqualTo(KafkaConstants.Book.PRODUCER);
         assertThat(event.getPayload()).isEqualTo(savedDto);
+    }
+
+    @Test
+    void create_whenIsbnExists_throwsDuplicateBookException() {
+        BookDto bookDto = new BookDto(null, "Clean Code", 2008, "Robert C. Martin", "Prentice Hall", "isbn-1", null, null);
+        Book existingBook = new Book("Clean Code", 2008, "Robert C. Martin", "Prentice Hall", "isbn-1");
+
+        when(repository.findByIsbn("isbn-1")).thenReturn(Optional.of(existingBook));
+
+        assertThatThrownBy(() -> bookService.create(bookDto))
+                .isInstanceOf(BookDuplicateException.class)
+                .hasMessageContaining("isbn-1");
+
+        verify(repository, never()).save(any());
+        verify(kafkaEventProducer, never()).send(any());
     }
 
     @Test

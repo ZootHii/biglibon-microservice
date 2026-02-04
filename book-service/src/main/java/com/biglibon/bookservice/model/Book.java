@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Persistent;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
@@ -17,7 +18,6 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 @Persistent
-@CompoundIndex(def = "{'isbn': 1}", unique = true)
 public class Book {
 
     @Id
@@ -28,7 +28,7 @@ public class Book {
     private String author;
     private String publisher;
 
-    //@Indexed(unique = true, background = true)
+    @Indexed(unique = true)
     private String isbn;
 
     @CreatedDate

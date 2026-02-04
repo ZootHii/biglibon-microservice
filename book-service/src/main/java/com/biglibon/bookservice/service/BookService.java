@@ -6,10 +6,13 @@ import com.biglibon.bookservice.repository.BookRepository;
 import com.biglibon.sharedlibrary.constant.KafkaConstants;
 import com.biglibon.sharedlibrary.consumer.KafkaEvent;
 import com.biglibon.sharedlibrary.dto.BookDto;
+import com.biglibon.sharedlibrary.exception.BookDuplicateException;
 import com.biglibon.sharedlibrary.exception.BookNotFoundException;
 import com.biglibon.sharedlibrary.producer.KafkaEventProducer;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -28,15 +31,22 @@ public class BookService {
         this.kafkaEventProducer = kafkaEventProducer;
     }
 
+    // Outbox pattern veya transactional event
+    @Transactional
     public BookDto create(BookDto bookDto) {
-        BookDto newBook = bookMapper.toDto(repository.save(bookMapper.toEntity(bookDto)));
+        Book bookToSave = bookMapper.toEntity(bookDto);
+        repository.findByIsbn(bookDto.isbn()).ifPresent(book -> {
+            throw new BookDuplicateException("Book already exists with ISBN: " + book.getIsbn());
+        });
+        Book bookSaved = repository.save(bookToSave);
+        BookDto bookSavedDto = bookMapper.toDto(bookSaved);
 
         kafkaEventProducer.send(new KafkaEvent<>(
                 KafkaConstants.Book.TOPIC,
                 KafkaConstants.Book.ADD_BOOK_EVENT,
                 KafkaConstants.Book.PRODUCER,
-                newBook));
-        return newBook;
+                bookSavedDto));
+        return bookSavedDto;
     }
 
     public List<BookDto> findAllByIds(List<String> ids) {
@@ -48,7 +58,7 @@ public class BookService {
     }
 
     public List<BookDto> findAllByIsbns(List<String> isbns) {
-        List<Book> books = repository.findAllByIsbnIn(isbns).get();
+        List<Book> books = repository.findAllByIsbnIn(isbns).orElse(Collections.emptyList());
         return bookMapper.toDtoList(books);
     }
 
