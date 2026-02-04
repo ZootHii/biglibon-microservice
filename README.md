@@ -7,9 +7,9 @@
                -f docker-compose-database.yaml \
                -f docker-compose-elasticsearch.yaml up -d
     ```
-- **Build Project**
+- **Build Project (we skip contextLoad test runs nit test)**
     ```bash
-        mvn clean package -DskipTests
+        mvn clean package
     ```
 ---
 
