@@ -16,6 +16,7 @@ import com.biglibon.sharedlibrary.exception.LibraryNotFoundException;
 import com.biglibon.sharedlibrary.producer.KafkaEventProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,25 +38,43 @@ public class LibraryService {
         this.kafkaEventProducer = kafkaEventProducer;
     }
 
+    // OUTBOX pattern gerekir
+    @Transactional
     public LibraryDto createLibrary(CreateLibraryRequest request) {
-        // burada libraryDTO yerine direkt olarak bookid leri de gönderebilmeliyiz
-        // library oluştururken bookid yi baştan verebiliriz
-        // o yüzden libraryDTO değişecek
-        // ve burada bookid ler gerçekten book-servicete var mı bakılacak
-        // book id değilde isbn ile devam etmek daha mantıklı olur bana ne bookid den yani
-
-        List<String> originalBookIsbns = request.getBookIsbns();
-        List<BookDto> validBookDtos = getValidBooksByBookIsbns(originalBookIsbns);
-
         Library library = libraryMapper.toEntityFromCreateLibraryRequest(request);
-        library.setBookIds(validBookDtos.stream().map(BookDto::id).toList());
-        Library savedLibrary = repository.save(library);
 
-        return new LibraryDto(savedLibrary.getId(),
+        List<String> requestedIsbns = request.getBookIsbns();
+        List<BookDto> validBookDtos = requestedIsbns.isEmpty()
+                ? List.of()
+                : getValidBooksByBookIsbns(requestedIsbns);
+
+        library.setBookIds(validBookDtos.stream()
+                .map(BookDto::id)
+                .toList());
+
+        Library savedLibrary = repository.save(library);
+        LibraryDto libraryDto = new LibraryDto(savedLibrary.getId(),
                 savedLibrary.getName(),
                 savedLibrary.getCity(),
                 savedLibrary.getPhone(),
                 validBookDtos);
+
+        publishLibraryEventIfNeeded(libraryDto, validBookDtos);
+
+        return libraryDto;
+    }
+
+    private void publishLibraryEventIfNeeded(LibraryDto libraryDto, List<BookDto> validBookDtos) {
+        if (validBookDtos.isEmpty()) {
+            return;
+        }
+
+        kafkaEventProducer.send(new KafkaEvent<>(
+                KafkaConstants.Library.TOPIC,
+                KafkaConstants.Library.ADD_BOOK_TO_LIBRARY_EVENT,
+                KafkaConstants.Library.PRODUCER,
+                libraryDto
+        ));
     }
 
     public List<LibraryDto> getAllLibraries() {
@@ -64,7 +83,9 @@ public class LibraryService {
                 .toList();
     }
 
+    // outbox pattern gerekir
     // hızlandırmak için library içinde belki id nin yanında isbnleri de tutabiliriz database de
+    @Transactional
     public LibraryDto addBooksToLibraryByIsbns(AddBooksToLibraryByIsbnsRequest request) {
         Library library = getLibraryById(request.getLibraryId());
 
@@ -99,6 +120,7 @@ public class LibraryService {
         return libraryDto;
     }
 
+    @Transactional
     public LibraryDto addBooksToLibraryByIds(AddBooksToLibraryByIdsRequest request) {
         Library library = getLibraryById(request.libraryId());
 
@@ -174,16 +196,6 @@ public class LibraryService {
 
         return validBooks;
     }
-
-
-
-
-
-
-
-
-
-
 
 
     // TESTING
