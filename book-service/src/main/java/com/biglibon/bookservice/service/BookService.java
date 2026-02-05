@@ -43,7 +43,7 @@ public class BookService {
 
         kafkaEventProducer.send(new KafkaEvent<>(
                 KafkaConstants.Book.TOPIC,
-                KafkaConstants.Book.ADD_BOOK_EVENT,
+                KafkaConstants.Book.CREATE_BOOK_EVENT,
                 KafkaConstants.Book.PRODUCER,
                 bookSavedDto));
         return bookSavedDto;

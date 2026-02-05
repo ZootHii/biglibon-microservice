@@ -41,7 +41,7 @@ public class BookServiceApplication implements CommandLineRunner {
             books.forEach(book -> {
                 kafkaEventProducer.send(new KafkaEvent<>(
                         KafkaConstants.Book.TOPIC,
-                        KafkaConstants.Book.ADD_BOOK_EVENT,
+                        KafkaConstants.Book.CREATE_BOOK_EVENT,
                         KafkaConstants.Book.PRODUCER,
                         bookMapper.toDto(book)));
             });

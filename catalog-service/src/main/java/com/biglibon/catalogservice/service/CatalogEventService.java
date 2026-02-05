@@ -3,15 +3,15 @@ package com.biglibon.catalogservice.service;
 import com.biglibon.catalogservice.mapper.CatalogMapper;
 import com.biglibon.catalogservice.model.Catalog;
 import com.biglibon.catalogservice.repository.CatalogMongoRepository;
-import com.biglibon.sharedlibrary.dto.BookSummaryDto;
-import com.biglibon.sharedlibrary.dto.CatalogDto;
-import com.biglibon.sharedlibrary.dto.LibrarySummaryDto;
+import com.biglibon.sharedlibrary.dto.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 public class CatalogEventService {
 
@@ -26,7 +26,9 @@ public class CatalogEventService {
     }
 
     @Transactional
-    public CatalogDto addOrUpdateBook(BookSummaryDto bookSummaryDto) {
+    public CatalogDto createOrUpdateCatalog(BookDto bookDto) {
+        BookSummaryDto bookSummaryDto = catalogMapper.bookDtoToBookSummaryDto(bookDto);
+
         Catalog catalog = catalogMongoRepository
                 .findByBookBookIdOrBookIsbn(bookSummaryDto.getBookId(), bookSummaryDto.getIsbn())
                 .map(existingCatalog -> { // update book
@@ -42,7 +44,11 @@ public class CatalogEventService {
         // each created or updated catalog should be sync to elasticsearch
         catalogSearchService.saveCatalogIndex(catalog);
 
-        return catalogMapper.toDto(catalog);
+        CatalogDto catalogDto = catalogMapper.toDto(catalog);
+
+        log.info("createOrUpdateCatalog in catalog: {}", catalogDto);
+
+        return catalogDto;
     }
 
     @Transactional
@@ -60,8 +66,19 @@ public class CatalogEventService {
         // each created or updated catalog should be sync to elasticsearch
         catalogSearchService.saveCatalogIndex(catalog);
 
-
         return catalogMapper.toDto(catalog);
+    }
+
+    public void mapLibraryDtoToSummaryDtos(LibraryDto libraryDto) {
+        LibrarySummaryDto librarySummaryDto = catalogMapper.libraryDtoToLibrarySummaryDto(libraryDto);
+
+        List<BookDto> books = libraryDto.getBooks();
+        if (books != null && !books.isEmpty()) {
+            books.stream()
+                    .map(catalogMapper::bookDtoToBookSummaryDto)
+                    .map(bookSummaryDto -> addLibraryToBook(bookSummaryDto, librarySummaryDto))
+                    .forEach(catalogDto -> log.info("addLibraryToBook in catalog: {}", catalogDto));
+        }
     }
 
     private Catalog updateLibraries(Catalog catalog, LibrarySummaryDto librarySummaryDto) {

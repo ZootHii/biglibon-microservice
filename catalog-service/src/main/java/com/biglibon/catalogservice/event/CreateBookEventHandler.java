@@ -1,14 +1,11 @@
 package com.biglibon.catalogservice.event;
 
-import com.biglibon.catalogservice.mapper.CatalogMapper;
 import com.biglibon.catalogservice.service.CatalogEventService;
 import com.biglibon.sharedlibrary.constant.KafkaConstants;
 import com.biglibon.sharedlibrary.consumer.KafkaEvent;
 import com.biglibon.sharedlibrary.consumer.KafkaEventHandler;
 import com.biglibon.sharedlibrary.consumer.KafkaEventSubscription;
 import com.biglibon.sharedlibrary.dto.BookDto;
-import com.biglibon.sharedlibrary.dto.BookSummaryDto;
-import com.biglibon.sharedlibrary.dto.CatalogDto;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -19,20 +16,15 @@ import org.springframework.stereotype.Component;
 @KafkaEventSubscription(
         consumerGroup = KafkaConstants.Catalog.CONSUMER_GROUP,
         topic = KafkaConstants.Book.TOPIC,
-        event = KafkaConstants.Book.ADD_BOOK_EVENT
+        event = KafkaConstants.Book.CREATE_BOOK_EVENT
 )
-public class AddBookEventHandler implements KafkaEventHandler {
+public class CreateBookEventHandler implements KafkaEventHandler {
 
     private final CatalogEventService catalogEventService;
-    private final CatalogMapper catalogMapper;
     private final ObjectMapper objectMapper;
 
-    public AddBookEventHandler(
-            CatalogEventService catalogEventService,
-            CatalogMapper catalogMapper,
-            ObjectMapper objectMapper) {
+    public CreateBookEventHandler(CatalogEventService catalogEventService, ObjectMapper objectMapper) {
         this.catalogEventService = catalogEventService;
-        this.catalogMapper = catalogMapper;
         this.objectMapper = objectMapper;
     }
 
@@ -43,17 +35,15 @@ public class AddBookEventHandler implements KafkaEventHandler {
                     objectMapper.convertValue(kafkaEvent, new TypeReference<>() {
                     });
 
-            //log.info("handling book-added event in catalog-service-consumer-group: {}", typedKafkaEvent);
+            //log.info("handling create-book event in catalog-service-consumer-group: {}", typedKafkaEvent);
 
-            // logic here
-            BookSummaryDto bookSummaryDto = catalogMapper.bookDtoToBookSummaryDto(typedKafkaEvent.getPayload());
-
-            CatalogDto catalogDto = catalogEventService.addOrUpdateBook(bookSummaryDto);
-            log.info("addOrUpdateBook in catalog: {}", catalogDto);
+            // logic here / each book created or updated event update catalog
+            BookDto bookDto = typedKafkaEvent.getPayload();
+            catalogEventService.createOrUpdateCatalog(bookDto);
 
         } catch (Exception e) {
             log.error("Failed to process event: {}, exception: {}",
-                    KafkaConstants.Book.ADD_BOOK_EVENT, e.getMessage(), e);
+                    KafkaConstants.Book.CREATE_BOOK_EVENT, e.getMessage(), e);
         }
     }
 }

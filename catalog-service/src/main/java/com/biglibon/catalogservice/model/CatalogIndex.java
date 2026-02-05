@@ -11,6 +11,7 @@ import org.springframework.data.elasticsearch.annotations.*;
 import java.time.Instant;
 import java.util.List;
 
+// ilerde manuel mapping yapmak şart anotasyon mapping karmaşa oluyo
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

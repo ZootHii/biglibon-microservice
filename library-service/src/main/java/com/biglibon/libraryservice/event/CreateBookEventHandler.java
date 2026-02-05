@@ -1,6 +1,5 @@
 package com.biglibon.libraryservice.event;
 
-import com.biglibon.libraryservice.mapper.LibraryMapper;
 import com.biglibon.libraryservice.service.LibraryService;
 import com.biglibon.sharedlibrary.constant.KafkaConstants;
 import com.biglibon.sharedlibrary.consumer.KafkaEvent;
@@ -17,20 +16,15 @@ import org.springframework.stereotype.Component;
 @KafkaEventSubscription(
         consumerGroup = KafkaConstants.Library.CONSUMER_GROUP,
         topic = KafkaConstants.Book.TOPIC,
-        event = KafkaConstants.Book.ADD_BOOK_EVENT
+        event = KafkaConstants.Book.CREATE_BOOK_EVENT
 )
-public class AddBookEventHandler implements KafkaEventHandler {
+public class CreateBookEventHandler implements KafkaEventHandler {
 
-    private final LibraryService catalogService;
-    private final LibraryMapper catalogMapper;
+    private final LibraryService libraryService;
     private final ObjectMapper objectMapper;
 
-    public AddBookEventHandler(
-            LibraryService catalogService,
-            LibraryMapper catalogMapper,
-            ObjectMapper objectMapper) {
-        this.catalogService = catalogService;
-        this.catalogMapper = catalogMapper;
+    public CreateBookEventHandler(LibraryService libraryService, ObjectMapper objectMapper) {
+        this.libraryService = libraryService;
         this.objectMapper = objectMapper;
     }
 
@@ -41,13 +35,15 @@ public class AddBookEventHandler implements KafkaEventHandler {
                     objectMapper.convertValue(kafkaEvent, new TypeReference<>() {
                     });
 
-            log.info("handling book-added event in library-service-consumer-group: {}", typedKafkaEvent);
+            log.info("handling create-book event in library-service-consumer-group: {}", typedKafkaEvent);
 
             // logic here
-
+            // not used for now
+            // kullanılabilir
+            // library e bildirim göndermek şu şu kitaplar yaratıldı diye ki eklesin
 
         } catch (Exception e) {
-            log.error("Failed to process event: {}, exception: {}", KafkaConstants.Book.ADD_BOOK_EVENT, e.getMessage(), e);
+            log.error("Failed to process event: {}, exception: {}", KafkaConstants.Book.CREATE_BOOK_EVENT, e.getMessage(), e);
         }
     }
 }

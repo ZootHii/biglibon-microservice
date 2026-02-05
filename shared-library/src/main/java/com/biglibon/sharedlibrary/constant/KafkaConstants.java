@@ -5,7 +5,7 @@ public final class KafkaConstants {
     public static final class Book {
         public static final String TOPIC = "book-events";
         public static final String PRODUCER = "book-service";
-        public static final String ADD_BOOK_EVENT = "add-book";
+        public static final String CREATE_BOOK_EVENT = "create-book";
         public static final String CONSUMER_GROUP = "book-service-consumer-group";
     }
 

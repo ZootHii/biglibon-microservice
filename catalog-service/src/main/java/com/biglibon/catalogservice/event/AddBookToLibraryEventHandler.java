@@ -1,6 +1,5 @@
 package com.biglibon.catalogservice.event;
 
-import com.biglibon.catalogservice.mapper.CatalogMapper;
 import com.biglibon.catalogservice.service.CatalogEventService;
 import com.biglibon.sharedlibrary.constant.KafkaConstants;
 import com.biglibon.sharedlibrary.consumer.KafkaEvent;
@@ -22,13 +21,10 @@ import org.springframework.stereotype.Component;
 public class AddBookToLibraryEventHandler implements KafkaEventHandler {
 
     private final CatalogEventService catalogEventService;
-    private final CatalogMapper catalogMapper;
     private final ObjectMapper objectMapper;
 
-    public AddBookToLibraryEventHandler(CatalogEventService catalogEventService, CatalogMapper catalogMapper,
-                                        ObjectMapper objectMapper) {
+    public AddBookToLibraryEventHandler(CatalogEventService catalogEventService, ObjectMapper objectMapper) {
         this.catalogEventService = catalogEventService;
-        this.catalogMapper = catalogMapper;
         this.objectMapper = objectMapper;
     }
 
@@ -42,17 +38,11 @@ public class AddBookToLibraryEventHandler implements KafkaEventHandler {
             //log.info("handling add-book-to-library event in catalog-service-consumer-group: {}", typedKafkaEvent);
 
             // logic here
-            LibraryDto libraryDto = typedKafkaEvent.getPayload();
-            LibrarySummaryDto librarySummaryDto = catalogMapper.libraryDtoToLibrarySummaryDto(libraryDto);
+            // if there is a book with libraries in library-service but no catalog yet
+            // create new catalog and update libraries then save
 
-            if (libraryDto.getBooks() != null && !libraryDto.getBooks().isEmpty()) {
-                libraryDto.getBooks().stream()
-                        .map(catalogMapper::bookDtoToBookSummaryDto)
-                        .map(bookSummaryDto ->
-                                catalogEventService.addLibraryToBook(bookSummaryDto, librarySummaryDto))
-                        .forEach(catalogDto ->
-                                log.info("addLibraryToBook in catalog: {}", catalogDto));
-            }
+            LibraryDto libraryDto = typedKafkaEvent.getPayload();
+            catalogEventService.mapLibraryDtoToSummaryDtos(libraryDto);
 
         } catch (Exception e) {
             log.error("Failed to process event: {}, exception: {}",

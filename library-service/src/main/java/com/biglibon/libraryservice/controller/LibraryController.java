@@ -1,6 +1,6 @@
 package com.biglibon.libraryservice.controller;
 
-import com.biglibon.libraryservice.dto.AddBooksToLibraryByIdsRequest;
+import com.biglibon.libraryservice.dto.AddBooksToLibraryByBookIdsRequest;
 import com.biglibon.libraryservice.dto.AddBooksToLibraryByIsbnsRequest;
 import com.biglibon.sharedlibrary.dto.CreateLibraryRequest;
 import com.biglibon.sharedlibrary.dto.LibraryDto;
@@ -43,32 +43,19 @@ public class LibraryController {
     }
 
     @PostMapping("/books/add/by-ids")
-    public ResponseEntity<LibraryDto> addBooksToLibraryByIds(
-            @RequestBody AddBooksToLibraryByIdsRequest request) {
-        return ResponseEntity.ok(libraryService.addBooksToLibraryByIds(request));
+    public ResponseEntity<LibraryDto> addBooksToLibraryByBookIds(@RequestBody AddBooksToLibraryByBookIdsRequest request) {
+        return ResponseEntity.ok(libraryService.addBooksToLibraryByBookIds(request));
     }
 
     @PostMapping("/books/add/by-isbns")
-    public ResponseEntity<LibraryDto> addBooksToLibraryByIsbns(
-            @RequestBody AddBooksToLibraryByIsbnsRequest request) {
+    public ResponseEntity<LibraryDto> addBooksToLibraryByIsbns(@RequestBody AddBooksToLibraryByIsbnsRequest request) {
         return ResponseEntity.ok(libraryService.addBooksToLibraryByIsbns(request));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<LibraryDto> getWithBooksById(@PathVariable @NotNull Long id) {
-        return ResponseEntity.ok(libraryService.findWithBooksById(id));
+    public ResponseEntity<LibraryDto> getLibraryWithBooksById(@PathVariable @NotNull Long id) {
+        return ResponseEntity.ok(libraryService.findLibraryWithBooksById(id));
     }
-
-
-
-
-
-
-
-
-
-
-
 
     // TESTING
     @GetMapping("/books")

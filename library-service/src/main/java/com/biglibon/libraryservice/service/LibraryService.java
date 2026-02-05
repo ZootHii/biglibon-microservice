@@ -2,7 +2,7 @@ package com.biglibon.libraryservice.service;
 
 import com.biglibon.libraryservice.dto.AddBooksToLibraryByIsbnsRequest;
 import com.biglibon.sharedlibrary.client.BookServiceClient;
-import com.biglibon.libraryservice.dto.AddBooksToLibraryByIdsRequest;
+import com.biglibon.libraryservice.dto.AddBooksToLibraryByBookIdsRequest;
 import com.biglibon.libraryservice.mapper.LibraryMapper;
 import com.biglibon.libraryservice.model.Library;
 import com.biglibon.sharedlibrary.constant.KafkaConstants;
@@ -43,6 +43,8 @@ public class LibraryService {
     public LibraryDto createLibrary(CreateLibraryRequest request) {
         Library library = libraryMapper.toEntityFromCreateLibraryRequest(request);
 
+        // check library exists / later
+
         List<String> requestedIsbns = request.getBookIsbns();
         List<BookDto> validBookDtos = requestedIsbns.isEmpty()
                 ? List.of()
@@ -77,6 +79,7 @@ public class LibraryService {
         ));
     }
 
+    // o n+1 ama çokta önemli değil şimdilik / tüm bookid ler ile tek call yapıp hashmap içinde tutup library e map edilebilir
     public List<LibraryDto> getAllLibraries() {
         return repository.findAll().stream()
                 .map(this::replaceBookIdsWithBooks)
@@ -84,7 +87,8 @@ public class LibraryService {
     }
 
     // outbox pattern gerekir
-    // hızlandırmak için library içinde belki id nin yanında isbnleri de tutabiliriz database de
+    // optimistic lock entity içinde long version @Version
+    // hızlandırmak için library içinde belki id nin yanında isbnleri de tutabiliriz database de, denormalize
     @Transactional
     public LibraryDto addBooksToLibraryByIsbns(AddBooksToLibraryByIsbnsRequest request) {
         Library library = getLibraryById(request.getLibraryId());
@@ -121,7 +125,7 @@ public class LibraryService {
     }
 
     @Transactional
-    public LibraryDto addBooksToLibraryByIds(AddBooksToLibraryByIdsRequest request) {
+    public LibraryDto addBooksToLibraryByBookIds(AddBooksToLibraryByBookIdsRequest request) {
         Library library = getLibraryById(request.libraryId());
 
         // hash used for better performance for lookup O(1)
@@ -148,7 +152,7 @@ public class LibraryService {
         return libraryDto;
     }
 
-    public LibraryDto findWithBooksById(Long id) {
+    public LibraryDto findLibraryWithBooksById(Long id) {
         Library library = getLibraryById(id);
         return replaceBookIdsWithBooks(library);
     }
@@ -161,13 +165,7 @@ public class LibraryService {
     public LibraryDto replaceBookIdsWithBooks(Library library) {
         LibraryDto libraryDto = libraryMapper.toDto(library);
 
-        List<BookDto> books;
-        try {
-            books = Optional.ofNullable(bookServiceClient.getAllByIds(library.getBookIds()).getBody())
-                    .orElse(List.of());
-        } catch (Exception e) {
-            books = List.of();
-        }
+        List<BookDto> books = bookServiceClient.getAllByIds(library.getBookIds()).getBody();
 
         libraryDto.setBooks(books);
         return libraryDto;
@@ -196,7 +194,6 @@ public class LibraryService {
 
         return validBooks;
     }
-
 
     // TESTING
     public List<BookDto> getAllBooksFromLibraryService() {

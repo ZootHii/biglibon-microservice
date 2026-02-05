@@ -40,7 +40,7 @@ class BookServiceTest {
     private BookService bookService;
 
     @Test
-    void create_whenValidRequest_producesKafkaAddBookEvent() {
+    void create_whenValidRequest_producesKafkaCreateBookEvent() {
         // api request
         BookDto bookDto = new BookDto(null, "Clean Code", 2008, "Robert C. Martin", "Prentice Hall", "isbn-1", null, null);
         // after dto mapped by bookMapper
@@ -67,7 +67,7 @@ class BookServiceTest {
         verify(kafkaEventProducer).send(eventCaptor.capture());
         KafkaEvent<BookDto> event = eventCaptor.getValue();
         assertThat(event.getTopic()).isEqualTo(KafkaConstants.Book.TOPIC);
-        assertThat(event.getEvent()).isEqualTo(KafkaConstants.Book.ADD_BOOK_EVENT);
+        assertThat(event.getEvent()).isEqualTo(KafkaConstants.Book.CREATE_BOOK_EVENT);
         assertThat(event.getProducer()).isEqualTo(KafkaConstants.Book.PRODUCER);
         assertThat(event.getPayload()).isEqualTo(savedDto);
     }
