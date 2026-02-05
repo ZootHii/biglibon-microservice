@@ -45,14 +45,14 @@ public class LibraryService {
 
         // check library exists / later
 
-        List<String> requestedIsbns = request.getBookIsbns();
-        List<BookDto> validBookDtos = requestedIsbns.isEmpty()
-                ? List.of()
-                : getValidBooksByBookIsbns(requestedIsbns);
-
-        library.setBookIds(validBookDtos.stream()
-                .map(BookDto::id)
-                .toList());
+        List<String> requestedIsbns = Optional.ofNullable(request.getBookIsbns()).orElse(List.of());
+        List<BookDto> validBookDtos = new ArrayList<>();
+        if (!requestedIsbns.isEmpty()) {
+            validBookDtos = getValidBooksByBookIsbns(requestedIsbns);
+            library.setBookIds(validBookDtos.stream()
+                    .map(BookDto::id)
+                    .toList());
+        }
 
         Library savedLibrary = repository.save(library);
         LibraryDto libraryDto = new LibraryDto(savedLibrary.getId(),
@@ -93,8 +93,14 @@ public class LibraryService {
     public LibraryDto addBooksToLibraryByIsbns(AddBooksToLibraryByIsbnsRequest request) {
         Library library = getLibraryById(request.getLibraryId());
 
+        List<String> requestedIsbns = Optional.ofNullable(request.getBookIsbns()).orElse(List.of());
+        if (requestedIsbns.isEmpty()) {
+            log.warn("There are no ISBNs.");
+            throw new BookNotFoundException("There are no ISBNs.");
+        }
+
         // get valid book with correct isbn
-        List<BookDto> validBooks = getValidBooksByBookIsbns(request.getBookIsbns());
+        List<BookDto> validBooks = getValidBooksByBookIsbns(requestedIsbns);
 
         // hash used for better performance for lookup O(1)
         Set<String> existingBookIds = new HashSet<>(library.getBookIds());
@@ -124,51 +130,9 @@ public class LibraryService {
         return libraryDto;
     }
 
-    @Transactional
-    public LibraryDto addBooksToLibraryByBookIds(AddBooksToLibraryByBookIdsRequest request) {
-        Library library = getLibraryById(request.libraryId());
-
-        // hash used for better performance for lookup O(1)
-        Set<String> existingBookIds = new HashSet<>(library.getBookIds());
-
-        // Only add bookIds not already present
-        request.bookIds().stream()
-                .filter(existingBookIds::add)  // add returns false if element already exists > filter removes duplicates
-                .forEach(library.getBookIds()::add);
-
-
-        Library updatedLibrary = repository.save(library);
-
-        // change ids with books
-        LibraryDto libraryDto = replaceBookIdsWithBooks(updatedLibrary);
-
-        // send kafka event
-        kafkaEventProducer.send(new KafkaEvent<>(
-                KafkaConstants.Library.TOPIC,
-                KafkaConstants.Library.ADD_BOOK_TO_LIBRARY_EVENT,
-                KafkaConstants.Library.PRODUCER,
-                libraryDto));
-
-        return libraryDto;
-    }
-
-    public LibraryDto findLibraryWithBooksById(Long id) {
-        Library library = getLibraryById(id);
-        return replaceBookIdsWithBooks(library);
-    }
-
     private Library getLibraryById(Long libraryId) {
         return repository.findById(libraryId)
                 .orElseThrow(() -> new LibraryNotFoundException("Library could not found by id:" + libraryId));
-    }
-
-    public LibraryDto replaceBookIdsWithBooks(Library library) {
-        LibraryDto libraryDto = libraryMapper.toDto(library);
-
-        List<BookDto> books = bookServiceClient.getAllByIds(library.getBookIds()).getBody();
-
-        libraryDto.setBooks(books);
-        return libraryDto;
     }
 
     private List<BookDto> getValidBooksByBookIsbns(List<String> bookIsbns) {
@@ -193,6 +157,54 @@ public class LibraryService {
         }
 
         return validBooks;
+    }
+
+    public LibraryDto replaceBookIdsWithBooks(Library library) {
+        LibraryDto libraryDto = libraryMapper.toDto(library);
+
+        List<BookDto> books = bookServiceClient.getAllByIds(library.getBookIds()).getBody();
+
+        libraryDto.setBooks(books);
+        return libraryDto;
+    }
+
+    public LibraryDto findLibraryWithBooksById(Long id) {
+        Library library = getLibraryById(id);
+        return replaceBookIdsWithBooks(library);
+    }
+
+    @Transactional
+    // do not care this dont use anymore
+    public LibraryDto addBooksToLibraryByBookIds(AddBooksToLibraryByBookIdsRequest request) {
+        Library library = getLibraryById(request.libraryId());
+
+        List<String> requestedBookIds = Optional.ofNullable(request.bookIds()).orElse(List.of());
+        if (requestedBookIds.isEmpty()) {
+            log.warn("There are no Book IDs.");
+            throw new BookNotFoundException("There are no Book IDs.");
+        }
+
+        // hash used for better performance for lookup O(1)
+        Set<String> existingBookIds = new HashSet<>(library.getBookIds());
+
+        // Only add bookIds not already present
+        requestedBookIds.stream()
+                .filter(existingBookIds::add)  // add returns false if element already exists > filter removes duplicates
+                .forEach(library.getBookIds()::add);
+
+        Library updatedLibrary = repository.save(library);
+
+        // change ids with books
+        LibraryDto libraryDto = replaceBookIdsWithBooks(updatedLibrary);
+
+        // send kafka event
+        kafkaEventProducer.send(new KafkaEvent<>(
+                KafkaConstants.Library.TOPIC,
+                KafkaConstants.Library.ADD_BOOK_TO_LIBRARY_EVENT,
+                KafkaConstants.Library.PRODUCER,
+                libraryDto));
+
+        return libraryDto;
     }
 
     // TESTING
