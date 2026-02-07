@@ -5,6 +5,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * Dispatches Kafka events to the appropriate handlers.
+ * Iterates through all registered KafkaEventHandler beans and invokes the one
+ * whose {@link KafkaEventSubscription} matches the event's topic, type, and consumer group.
+ *
+ */
 @Slf4j
 @Component
 public class KafkaEventDispatcher {

@@ -26,6 +26,11 @@
 
     <!-- all dependencies optional true for making all services undependent from shared-library dependencies-->
     <dependencies>
+        <!--aop-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
         <!--spring-web-->
         <dependency>
             <groupId>org.springframework.boot</groupId>

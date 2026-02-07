@@ -8,6 +8,7 @@ import com.biglibon.sharedlibrary.consumer.KafkaEvent;
 import com.biglibon.sharedlibrary.dto.BookDto;
 import com.biglibon.sharedlibrary.exception.BookDuplicateException;
 import com.biglibon.sharedlibrary.exception.BookNotFoundException;
+import com.biglibon.sharedlibrary.performance.TrackPerformanceMetric;
 import com.biglibon.sharedlibrary.producer.KafkaEventProducer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,7 @@ public class BookService {
 
     // Outbox pattern veya transactional event
     @Transactional
+    @TrackPerformanceMetric
     public BookDto create(BookDto bookDto) {
         Book bookToSave = bookMapper.toEntity(bookDto);
         repository.findByIsbn(bookDto.isbn()).ifPresent(book -> {
@@ -53,10 +55,12 @@ public class BookService {
         return bookMapper.toDtoList(repository.findAllById(ids));
     }
 
+    @TrackPerformanceMetric
     public List<BookDto> findAll() {
         return bookMapper.toDtoList(repository.findAll());
     }
 
+    @TrackPerformanceMetric("mostly client request")
     public List<BookDto> findAllByIsbns(List<String> isbns) {
         List<Book> books = repository.findAllByIsbnIn(isbns).orElse(Collections.emptyList());
         return bookMapper.toDtoList(books);

@@ -13,6 +13,7 @@ import com.biglibon.libraryservice.repository.LibraryRepository;
 import com.biglibon.sharedlibrary.dto.BookDto;
 import com.biglibon.sharedlibrary.exception.BookNotFoundException;
 import com.biglibon.sharedlibrary.exception.LibraryNotFoundException;
+import com.biglibon.sharedlibrary.performance.TrackPerformanceMetric;
 import com.biglibon.sharedlibrary.producer.KafkaEventProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ public class LibraryService {
     }
 
     // OUTBOX pattern gerekir
+    @TrackPerformanceMetric
     @Transactional
     public LibraryDto createLibrary(CreateLibraryRequest request) {
         Library library = libraryMapper.toEntityFromCreateLibraryRequest(request);
@@ -80,6 +82,7 @@ public class LibraryService {
     }
 
     // o n+1 ama çokta önemli değil şimdilik / tüm bookid ler ile tek call yapıp hashmap içinde tutup library e map edilebilir
+    @TrackPerformanceMetric
     public List<LibraryDto> getAllLibraries() {
         return repository.findAll().stream()
                 .map(this::replaceBookIdsWithBooks)
@@ -90,6 +93,7 @@ public class LibraryService {
     // optimistic lock entity içinde long version @Version
     // hızlandırmak için library içinde belki id nin yanında isbnleri de tutabiliriz database de, denormalize
     @Transactional
+    @TrackPerformanceMetric
     public LibraryDto addBooksToLibraryByIsbns(AddBooksToLibraryByIsbnsRequest request) {
         Library library = getLibraryById(request.getLibraryId());
 

@@ -4,6 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Generic Kafka Event class.
+ * Holds information about the consumer group, topic, event type, producer, and the generic payload.
+ */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -4,6 +4,7 @@ import com.biglibon.catalogservice.mapper.CatalogMapper;
 import com.biglibon.catalogservice.model.Catalog;
 import com.biglibon.catalogservice.repository.CatalogMongoRepository;
 import com.biglibon.sharedlibrary.dto.*;
+import com.biglibon.sharedlibrary.performance.TrackPerformanceMetric;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,8 @@ public class CatalogEventService {
     }
 
     @Transactional
-    public CatalogDto createOrUpdateCatalog(BookDto bookDto) {
+    @TrackPerformanceMetric
+    public void createOrUpdateCatalog(BookDto bookDto) {
         BookSummaryDto bookSummaryDto = catalogMapper.bookDtoToBookSummaryDto(bookDto);
 
         Catalog catalog = catalogMongoRepository
@@ -48,7 +50,6 @@ public class CatalogEventService {
 
         log.info("createOrUpdateCatalog in catalog: {}", catalogDto);
 
-        return catalogDto;
     }
 
     @Transactional
@@ -69,6 +70,7 @@ public class CatalogEventService {
         return catalogMapper.toDto(catalog);
     }
 
+    @TrackPerformanceMetric
     public void mapLibraryDtoToSummaryDtos(LibraryDto libraryDto) {
         LibrarySummaryDto librarySummaryDto = catalogMapper.libraryDtoToLibrarySummaryDto(libraryDto);
 
