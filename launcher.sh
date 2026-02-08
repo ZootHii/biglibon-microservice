@@ -2,6 +2,8 @@
 set -eu
 
 #Elasticsearch certs
+#to fix mount error because of docker in docker, creating temp volume just for launcher.
+# Normally elastic-search certs created and mounted under biglibon-microservice/.elasticsearch
 #Error response from daemon: mounts denied:
 #The path /opt/biglibon-microservice/.elasticsearch/certs is not shared from the host and is not known to Docker.
 cat > /tmp/docker-compose.launcher.override.yaml <<'YAML'
