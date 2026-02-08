@@ -1,15 +1,25 @@
 services:
   eureka-server:
     image: docker.io/zoothii/biglibon-microservice-eureka-server:master
+    build: null
+    pull_policy: always
 
   api-gateway:
     image: docker.io/zoothii/biglibon-microservice-api-gateway:master
+    build: null
+    pull_policy: always
 
   book-service:
     image: docker.io/zoothii/biglibon-microservice-book-service:master
+    build: null
+    pull_policy: always
 
   library-service:
     image: docker.io/zoothii/biglibon-microservice-library-service:master
+    build: null
+    pull_policy: always
 
   catalog-service:
     image: docker.io/zoothii/biglibon-microservice-catalog-service:master
+    build: null
+    pull_policy: always
