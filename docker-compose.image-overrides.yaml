@@ -1,0 +1,15 @@
+services:
+  eureka-server:
+    image: docker.io/zoothii/biglibon-microservice-eureka-server:master
+
+  api-gateway:
+    image: docker.io/zoothii/biglibon-microservice-api-gateway:master
+
+  book-service:
+    image: docker.io/zoothii/biglibon-microservice-book-service:master
+
+  library-service:
+    image: docker.io/zoothii/biglibon-microservice-library-service:master
+
+  catalog-service:
+    image: docker.io/zoothii/biglibon-microservice-catalog-service:master
