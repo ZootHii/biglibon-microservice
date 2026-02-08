@@ -7,6 +7,15 @@
       user: "0" # means root user
       networks:
         - biglibon-network
+      depends_on:
+        kafka-4:
+          condition: service_healthy
+        kafka-5:
+          condition: service_healthy
+        kafka-6:
+          condition: service_healthy
+        kafka-7:
+          condition: service_healthy
       command: >
         bash -c '
           if [ x${ELASTIC_PASSWORD} == x ]; then

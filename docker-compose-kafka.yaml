@@ -30,6 +30,11 @@ services:
     container_name: kafka-1
     networks:
       - biglibon-network
+    depends_on:
+      mongo-db:
+        condition: service_healthy
+      postgres-db:
+        condition: service_healthy
     environment:
       CLUSTER_ID: ${KAFKA_CLUSTER_ID}
       KAFKA_CLUSTER_ID: ${KAFKA_CLUSTER_ID}

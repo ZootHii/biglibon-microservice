@@ -1,15 +1,46 @@
 # Biglibon Microservice Use & Environment Setup
-### Environment Setup
+### Environment Setup ON DOCKER
+
+- **Build Project (we skip contextLoad test runs nit test)**
+    ```bash
+  mvn clean package
+    ```
+
+- **Run All Services on Docker**
+    ```bash
+  docker-compose \
+  -f docker-compose.yaml \
+  -f docker-compose-kafka.yaml \
+  -f docker-compose-database.yaml \
+  -f docker-compose-elasticsearch.yaml \
+  build --no-cache \
+  && 
+  docker-compose \
+  -f docker-compose.yaml \
+  -f docker-compose-kafka.yaml \
+  -f docker-compose-database.yaml \
+  -f docker-compose-elasticsearch.yaml \
+  up -d
+    ```
+
+- **Stop and remove built images and volumes**
+    ```bash
+    docker-compose \
+    -f docker-compose.yaml \
+    -f docker-compose-kafka.yaml \
+    -f docker-compose-database.yaml \
+    -f docker-compose-elasticsearch.yaml \
+    down --rmi local -v
+    ```
+
+### Environment Setup ON LOCAL
 
 - **Setup DBs, Kafka, and Elasticsearch on Docker**
     ```bash
-    docker-compose -f docker-compose-kafka.yaml \
-               -f docker-compose-database.yaml \
-               -f docker-compose-elasticsearch.yaml up -d
-    ```
-- **Build Project (we skip contextLoad test runs nit test)**
-    ```bash
-        mvn clean package
+  docker-compose \
+  -f docker-compose-kafka.yaml \
+  -f docker-compose-database.yaml \
+  -f docker-compose-elasticsearch.yaml up -d
     ```
 ---
 
@@ -19,6 +50,14 @@
 3. Run Book Service
 4. Run Library Service
 5. Run Catalog Service
+
+- **Remove containers and volumes**
+    ```bash
+  docker-compose \
+  -f docker-compose-kafka.yaml \
+  -f docker-compose-database.yaml \
+  -f docker-compose-elasticsearch.yaml down --rmi local -v
+    ```
 
 ---
 
@@ -31,12 +70,6 @@
 
 ---
 
-- **Remove containers and volumes**
-    ```bash
-    docker-compose -f docker-compose-kafka.yaml \
-               -f docker-compose-database.yaml \
-               -f docker-compose-elasticsearch.yaml down --rmi local -v
-    ```
 ## How the App Works
 
 - First create/add **books**
