@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-# elasticsearch certs
+#Elasticsearch certs
 #Error response from daemon: mounts denied:
 #The path /opt/biglibon-microservice/.elasticsearch/certs is not shared from the host and is not known to Docker.
 cat > /tmp/docker-compose.launcher.override.yaml <<'YAML'
@@ -40,7 +40,6 @@ COMPOSE_FILES="-f /opt/biglibon-microservice/docker-compose.yaml \
 -f /opt/biglibon-microservice/docker-compose.image-overrides.yaml \
 -f /tmp/docker-compose.launcher.override.yaml"
 
-# Docker socket kontrolü
 if [ ! -S /var/run/docker.sock ]; then
     echo "ERROR: Host Docker socket (/var/run/docker.sock) not found."
     echo "Image needs to run Docker with host socket:"
@@ -50,13 +49,10 @@ fi
 
 echo "Using host Docker socket..."
 
-# Pull ve up
 docker compose $COMPOSE_FILES pull --ignore-buildable
 docker compose $COMPOSE_FILES up -d --no-build
 docker compose $COMPOSE_FILES ps
 
-# Cleanup trap
 trap 'docker compose $COMPOSE_FILES down -v || true' INT TERM
 
-# Keep container alive
 while true; do sleep 30; done

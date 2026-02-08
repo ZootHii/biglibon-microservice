@@ -11,7 +11,6 @@ COPY .env \
      launcher.sh \
      ./
 
-# Script’i çalıştırılabilir yap
 RUN chmod +x launcher.sh
 
 EXPOSE 8888 8761 9090 8081 5050 5601

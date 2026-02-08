@@ -1,7 +1,23 @@
 # Biglibon Microservice Use & Environment Setup
 ### Environment Setup ON DOCKER
 
-- **Build Project (we skip contextLoad test runs nit test)**
+- **To Run everything on Docker**
+    ```bash
+  docker run docker.io/zoothii/biglibon-microservice:master
+    ```
+This command will create everything and make project up and running, 
+it will pull every necessary image along with published services on Docker Hub 
+(postgres, pgadmin4, mongo, mongo-express, elasticsearch, kibana, docker.io/apache/kafka, ghcr.io/kafbat/kafka-ui) 
+it will take some time XD 
+
+- **If that command fail try**
+    ```bash
+  docker run --rm -v /var/run/docker.sock:/var/run/docker.sock docker.io/zoothii/biglibon-microservice:master
+    ```
+
+#### OR
+
+- **Build Project (we skip contextLoad test runs unit test)**
     ```bash
   mvn clean package
     ```
@@ -197,58 +213,38 @@ GET http://localhost:8888/v1/catalogs/search/gur
 
 ---
 
+## GitHub Actions CI/CD (No deploy yet just create docker image then push to Docker Hub and GHCR)
 
+### Pipeline
+1. **CI**: On every `master` push runs `mvn clean verify`.
+2. **Docker Build**: On every `master` push, build jars `target/*.jar` and creates images of all services.
+3. **Docker Stack Build**: On every `master` push, build and creates all in one `biglibon-microservice` image.
+4. **Publish Images**: Every image created published on **Docker Hub** and **GHCR**.
+5. **Deploy**: No deploy yet.
 
-```markdown
-# Biglibon Microservice Use & Environment Setup
+---
 
-## Build & Run
+## Images (`biglibon-microservice`)
 
-```bash
-# Build project
-mvn clean package -DskipTests
+### Docker Hub
+- `docker.io/zoothii/biglibon-microservice-eureka-server:master`
+- `docker.io/zoothii/biglibon-microservice-api-gateway:master`
+- `docker.io/zoothii/biglibon-microservice-book-service:master`
+- `docker.io/zoothii/biglibon-microservice-library-service:master`
+- `docker.io/zoothii/biglibon-microservice-catalog-service:master`
 
-# Build and run all services
-docker-compose -f docker-compose.yaml \
-               -f docker-compose-kafka.yaml \
-               -f docker-compose-database.yaml \
-               -f docker-compose-elasticsearch.yaml build --no-cache
+### GHCR
+- `ghcr.io/zoothii/biglibon-microservice-eureka-server:master`
+- `ghcr.io/zoothii/biglibon-microservice-api-gateway:master`
+- `ghcr.io/zoothii/biglibon-microservice-book-service:master`
+- `ghcr.io/zoothii/biglibon-microservice-library-service:master`
+- `ghcr.io/zoothii/biglibon-microservice-catalog-service:master`
 
-docker-compose -f docker-compose.yaml \
-               -f docker-compose-kafka.yaml \
-               -f docker-compose-database.yaml \
-               -f docker-compose-elasticsearch.yaml up -d
+---
 
-# Stop and remove locally built images and volumes
-docker-compose -f docker-compose.yaml \
-               -f docker-compose-kafka.yaml \
-               -f docker-compose-database.yaml \
-               -f docker-compose-elasticsearch.yaml down --rmi local -v
-```
+## GitHub Secrets
 
-### Individual Runs
+Repo → **Settings → Secrets and variables → Actions**:
 
-- **RUN 1**
-  ```bash
-  docker-compose -f docker-compose-elasticsearch.yaml up -d
-  docker-compose -f docker-compose-elasticsearch.yaml down --rmi local -v
-  ```
-
-- **RUN 2**
-  ```bash
-  docker-compose -f docker-compose-kafka.yaml up -d
-  docker-compose -f docker-compose-kafka.yaml down --rmi local -v
-  ```
-
-- **RUN 3**
-  ```bash
-  docker-compose -f docker-compose-database.yaml up -d
-  docker-compose -f docker-compose-database.yaml down --rmi local -v
-  ```
-
-- **RUN 4**
-  ```bash
-  docker-compose -f docker-compose.yaml build --no-cache
-  docker-compose -f docker-compose.yaml up -d
-  docker-compose -f docker-compose.yaml down --rmi local -v
-  ```
+- `DOCKERHUB_USERNAME` → Docker Hub Username
+- `DOCKERHUB_TOKEN` → Docker Hub Access Token
