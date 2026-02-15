@@ -89,6 +89,7 @@ public class LibraryService {
                 .toList();
     }
 
+    //thread-safety / race condition
     // outbox pattern gerekir
     // optimistic lock entity içinde long version @Version
     // hızlandırmak için library içinde belki id nin yanında isbnleri de tutabiliriz database de, denormalize

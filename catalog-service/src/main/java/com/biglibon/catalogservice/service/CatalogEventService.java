@@ -52,6 +52,7 @@ public class CatalogEventService {
 
     }
 
+    // thread-safety / race condition
     @Transactional
     public CatalogDto addLibraryToBook(BookSummaryDto bookSummaryDto, LibrarySummaryDto librarySummaryDto) {
         Catalog catalog = catalogMongoRepository
@@ -83,6 +84,7 @@ public class CatalogEventService {
         }
     }
 
+    // thread-safety / race condition
     private Catalog updateLibraries(Catalog catalog, LibrarySummaryDto librarySummaryDto) {
         List<LibrarySummaryDto> libraries = catalog.getLibraries();
         if (libraries == null) {
