@@ -1,4 +1,144 @@
-# Biglibon Microservice Use & Environment Setup
+# Biglibon Microservice
+## 1) What is this project?
+
+Biglibon is a **microservice-based library management backend which uses multiple technologies combined**. It manages:
+
+- books,
+- libraries,
+- and searchable catalog records.
+
+The project is split into independent services (plus a shared Java library):
+
+- **eureka-server** → service discovery,
+- **api-gateway** → single entry point and request routing,
+- **book-service** → book CRUD and book events,
+- **library-service** → library CRUD and assigning books to libraries,
+- **catalog-service** → denormalized read model + text search,
+- **shared-library** → common DTOs, Kafka infrastructure, exception handling, and cross-cutting utilities.
+
+At the root, a parent Maven project aggregates all modules.
+
+---
+
+## Core architecture
+
+Think of the system in 3 layers:
+
+1. **Access layer**: API Gateway receives client requests and forwards them.
+2. **Business layer**: Book/Library/Catalog services handle domain logic.
+3. **Data + Event layer**: MongoDB, PostgreSQL, Elasticsearch store data; Kafka moves events between services.
+
+A request flow example:
+
+1. Client calls API Gateway (`/v1/books`, `/v1/libraries`, `/v1/catalogs`).
+2. Gateway routes request to the right service via service discovery.
+3. Service stores data in its own DB.
+4. Some actions publish Kafka events.
+5. Catalog service consumes events and builds/updates searchable catalog records.
+6. Catalog records are also synced to Elasticsearch for text search.
+
+---
+
+## Services and responsibilities
+
+### API Gateway
+
+- Public entry point on port `8888`.
+- Routes paths:
+  - `/v1/books/**` → book-service
+  - `/v1/libraries/**` → library-service
+  - `/v1/catalogs/**` → catalog-service
+- Also forwards actuator paths using `StripPrefix`.
+
+### Eureka Server
+
+- Service registry on port `8761`.
+- Other services register themselves and discover each other.
+
+### Book Service
+
+- Manages books in MongoDB.
+- Endpoints for create/list/get by id/isbn.
+- Publishes `create-book` events to Kafka topic `book-events`.
+
+### Library Service
+
+- Manages libraries in PostgreSQL.
+- Can add books to libraries by ISBN.
+- Uses **Feign Client** to call book-service when resolving books.
+- Publishes `add-book-to-library` events to Kafka topic `library-events`.
+
+### Catalog Service
+
+- Keeps a combined catalog model (book + libraries).
+- Consumes events from `book-events` and `library-events`.
+- Stores catalog data in MongoDB.
+- Indexes catalog documents in Elasticsearch for search.
+- Provides text search endpoint (`/v1/catalogs/search/{text}`).
+
+### Shared Library
+
+- Contains shared **DTO classes and response models**.
+- Provides common **Kafka event model/dispatcher/producer** support.
+- Includes common **exception handlers** and **performance-tracking AOP** annotations.
+
+---
+
+## Technologies used
+
+- **Java 21**
+- **Maven (multi-module project)**
+- **Spring Boot 3.5.0**
+- **Spring Cloud 2025.0.0**
+- **Spring Cloud Netflix Eureka**
+- **Spring Cloud Gateway (WebFlux)**
+- **Spring Cloud OpenFeign**
+- **Spring Kafka**
+- **Spring Data MongoDB**
+- **Spring Data JPA** (for PostgreSQL-backed service)
+- **Spring Data Elasticsearch**
+- **Spring Boot Actuator**
+- **Apache Kafka 4.0.0** (KRaft multi-broker compose topology)
+- **Kafka UI: ghcr.io/kafbat/kafka-ui:v1.1.0**
+- **MongoDB 8.0.10** (+ mongo-express `1.0.2-18`)
+- **PostgreSQL 17.5** (+ pgAdmin4 `9.4.0`)
+- **Elasticsearch 9.0.2** (3-node cluster)
+- **Kibana 9.0.2**
+- **Lombok 1.18.38**
+- **MapStruct 1.6.3**
+- **Hibernate Validator** `8.0.2.Final`
+
+---
+
+Each domain service owns its data store:
+
+- **book-service** → MongoDB
+- **library-service** → PostgreSQL
+- **catalog-service** → MongoDB + Elasticsearch index for search
+
+This separation is a typical microservice pattern: each service controls its own schema and persistence.
+
+---
+
+The system uses Kafka for cross-service updates:
+
+- `book-service` emits `create-book` events (`book-events`).
+- `library-service` emits `add-book-to-library` events (`library-events`).
+- `catalog-service` listens to both topics and updates catalog read models.
+
+This means catalog data is built asynchronously from domain events.
+
+---
+
+Detail notes
+
+- Service ports are dynamic (`server.port: 0`) for business services; gateway and eureka have fixed public ports.
+- Routing and service-to-service communication rely on Eureka registration.
+- Catalog updates are event-driven, so there can be a short delay before search reflects a write.
+- The `shared-library` module reduces duplication across services.
+
+---
+
 ### Environment Setup ON DOCKER
 
 - **To Run everything on Docker**
