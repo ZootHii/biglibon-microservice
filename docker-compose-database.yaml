@@ -75,11 +75,41 @@ services:
       retries: 30
       start_period: 20s
 
+  redis-ui:
+    image: redis/redisinsight:3.0.2
+    container_name: redis-ui
+    restart: unless-stopped
+    ports:
+      - "5540:5540"
+    volumes:
+      - redis-ui-data:/data
+    networks:
+      - biglibon-network
+    depends_on:
+      - redis-db
+
+  redis-db:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-db-data:/data
+    networks:
+      - biglibon-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+
 ####### Volumes #######
 volumes:
   mongo-db-data:
   postgres-ui-data:
   postgres-db-data:
+  redis-db-data:
+  redis-ui-data:
 
 ####### Networks #######
 networks:

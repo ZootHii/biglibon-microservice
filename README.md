@@ -223,6 +223,7 @@ it will take some time XD
 - `http://localhost:8081` → Mongo UI
 - `http://localhost:5050` → Postgres UI
 - `http://localhost:5601` → Kibana
+- `http://localhost:5540` → Redis UI
 
 ---
 
@@ -390,18 +391,18 @@ Repo → **Settings → Secrets and variables → Actions**:
 - `DOCKERHUB_TOKEN` → Docker Hub Access Token
 
 ## TODO or May
-idempotency aspect, control with redis*
-caching redis
-spring retry, retryable*
-race condition, thread safety issues*
-outbox pattern Debezium + CDC
-security authentication JWT/OAuth2
-search utility class elasticsearch
-opentelemetry grafana observability, monitoring
-swagger openapi
-Resilience4j retry, rate limiter, timeout
-CD deployment missing
-es pagination, more details
-integration tests, test containers
+idempotency aspect, control with redis*  
+caching redis  
+spring retry, retryable*  
+race condition, thread safety issues*  
+outbox pattern Debezium + CDC  
+security authentication JWT/OAuth2  
+search utility class elasticsearch  
+opentelemetry grafana observability, monitoring  
+swagger openapi  
+Resilience4j retry, rate limiter, timeout  
+CD deployment missing  
+es pagination, more details  
+integration tests, test containers  
 
 
