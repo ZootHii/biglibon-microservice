@@ -4,6 +4,7 @@ import com.biglibon.catalogservice.model.Catalog;
 import com.biglibon.catalogservice.service.CatalogDomainService;
 import com.biglibon.catalogservice.service.CatalogSearchService;
 import com.biglibon.sharedlibrary.dto.BookSummaryDto;
+import com.biglibon.sharedlibrary.dto.LibrarySummaryDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,9 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -42,19 +45,42 @@ public class CatalogRaceConditionTest {
 
     @Test
     void race_createOrUpdateCatalog() throws InterruptedException {
-        BookSummaryDto dto = new BookSummaryDto("book-1","Book One", 1,
+        BookSummaryDto dto = new BookSummaryDto("book-1", "Book One", 1,
                 "Ahmet Test", "Test", "isbn-1");
 
-        int threadCount = 2; // aynı anda iki event simüle
+        runConcurrent(2, () -> catalogService.createOrUpdateCatalog(dto));
+
+        long count = mongoTemplate.count(new Query(), Catalog.class);
+        assertEquals(1, count);
+    }
+
+    @Test
+    void race_addLibraryToCatalogBook()
+            throws InterruptedException {
+        BookSummaryDto book = new BookSummaryDto("book-1","Book One", 1,
+                "Ahmet Test", "Test", "isbn-1");
+        LibrarySummaryDto library = new LibrarySummaryDto(58L, "Library One", "Sivas", "58");
+
+        runConcurrent(2, () -> catalogService.addLibraryToCatalogBook(book, library));
+
+        List<Catalog> catalogs = mongoTemplate.find(new Query(), Catalog.class);
+        assertEquals(1, catalogs.size());
+        assertEquals(1, catalogs.getFirst().getLibraries().size());
+        assertEquals(58L, catalogs.getFirst().getLibraries().getFirst().getLibraryId());
+    }
+
+    private void runConcurrent(int threadCount, Runnable action) throws InterruptedException {
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         CountDownLatch latch = new CountDownLatch(threadCount);
+        AtomicReference<RuntimeException> exceptionRef = new AtomicReference<>();
 
         for (int i = 0; i < threadCount; i++) {
             executor.submit(() -> {
                 try {
-                    catalogService.createOrUpdateCatalog(dto);
-                } catch (Exception e) {
-                    System.out.println("Exception caught: " + e.getMessage());
+
+                    action.run();
+                } catch (RuntimeException e) {
+                    exceptionRef.compareAndSet(null, e);
                 } finally {
                     latch.countDown();
                 }
@@ -64,8 +90,9 @@ public class CatalogRaceConditionTest {
         latch.await();
         executor.shutdown();
 
-        long count = mongoTemplate.count(new Query(), Catalog.class);
-        System.out.println("Catalog count: " + count);
-        assertEquals(1, count); // unique index sayesinde sadece 1 catalog olmalı
+        if (exceptionRef.get() != null) {
+            throw exceptionRef.get();
+        }
     }
+
 }
