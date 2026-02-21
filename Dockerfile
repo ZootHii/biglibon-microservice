@@ -13,6 +13,6 @@ COPY .env \
 
 RUN chmod +x launcher.sh
 
-EXPOSE 8888 8761 9090 8081 5050 5601
+EXPOSE 8888 8761 9090 8081 5050 5540 5601
 
 ENTRYPOINT ["sh", "launcher.sh"]

@@ -26,7 +26,7 @@ services:
         condition: service_healthy
       mongo-db:
         condition: service_healthy
-      redis:
+      redis-db:
         condition: service_healthy
       kafka-4:
         condition: service_healthy
@@ -72,7 +72,7 @@ services:
         condition: service_healthy
       mongo-db:
         condition: service_healthy
-      redis:
+      redis-db:
         condition: service_healthy
       kafka-4:
         condition: service_healthy
@@ -127,7 +127,7 @@ services:
         condition: service_healthy
       mongo-db:
         condition: service_healthy
-      redis:
+      redis-db:
         condition: service_healthy
       kafka-4:
         condition: service_healthy
@@ -182,7 +182,7 @@ services:
         condition: service_healthy
       mongo-db:
         condition: service_healthy
-      redis:
+      redis-db:
         condition: service_healthy
       kafka-4:
         condition: service_healthy
@@ -242,7 +242,7 @@ services:
         condition: service_healthy
       mongo-db:
         condition: service_healthy
-      redis:
+      redis-db:
         condition: service_healthy
       kafka-4:
         condition: service_healthy
