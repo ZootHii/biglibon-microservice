@@ -11,7 +11,6 @@ import com.biglibon.sharedlibrary.exception.BookNotFoundException;
 import com.biglibon.sharedlibrary.performance.TrackPerformanceMetric;
 import com.biglibon.sharedlibrary.producer.KafkaEventProducer;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,8 +31,7 @@ public class BookService {
         this.kafkaEventProducer = kafkaEventProducer;
     }
 
-    // Outbox pattern veya transactional event
-    @Transactional
+    // maybe outbox pattern
     @TrackPerformanceMetric
     public BookDto create(BookDto bookDto) {
         Book bookToSave = bookMapper.toEntity(bookDto);

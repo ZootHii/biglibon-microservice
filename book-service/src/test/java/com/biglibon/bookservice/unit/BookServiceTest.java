@@ -1,8 +1,9 @@
-package com.biglibon.bookservice.service;
+package com.biglibon.bookservice.unit;
 
 import com.biglibon.bookservice.mapper.BookMapper;
 import com.biglibon.bookservice.model.Book;
 import com.biglibon.bookservice.repository.BookRepository;
+import com.biglibon.bookservice.service.BookService;
 import com.biglibon.sharedlibrary.constant.KafkaConstants;
 import com.biglibon.sharedlibrary.consumer.KafkaEvent;
 import com.biglibon.sharedlibrary.dto.BookDto;

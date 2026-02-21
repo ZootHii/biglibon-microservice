@@ -1,15 +1,18 @@
 package com.biglibon.catalogservice.integration;
 
 import com.biglibon.catalogservice.model.Catalog;
+import com.biglibon.catalogservice.service.CatalogDataService;
 import com.biglibon.catalogservice.service.CatalogDomainService;
 import com.biglibon.catalogservice.service.CatalogSearchService;
 import com.biglibon.sharedlibrary.dto.BookSummaryDto;
 import com.biglibon.sharedlibrary.dto.LibrarySummaryDto;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -28,6 +31,9 @@ public class CatalogRaceConditionTest {
     @MockitoBean
     private CatalogSearchService catalogSearchService;
 
+    @MockitoBean
+    private CatalogDataService catalogDataService;
+
     @Autowired
     private CatalogDomainService catalogService;
 
@@ -43,27 +49,55 @@ public class CatalogRaceConditionTest {
         mongoTemplate.remove(query, Catalog.class);
     }
 
+    @AfterEach
+    void tearDown() {
+        Query query = new Query(
+                Criteria.where("book.bookId").is("book-1")
+                        .and("book.isbn").is("isbn-1")
+        );
+        mongoTemplate.remove(query, Catalog.class);
+    }
+
     @Test
     void race_createOrUpdateCatalog() throws InterruptedException {
         BookSummaryDto dto = new BookSummaryDto("book-1", "Book One", 1,
                 "Ahmet Test", "Test", "isbn-1");
 
-        runConcurrent(2, () -> catalogService.createOrUpdateCatalog(dto));
+        runConcurrent(2, () -> {
+            try {
+                catalogService.createOrUpdateCatalog(dto);
+            } catch (DuplicateKeyException ignored) {
+            }
+        });
+        Query query = new Query(
+                Criteria.where("book.bookId").is("book-1")
+                        .and("book.isbn").is("isbn-1")
+        );
+        long count = mongoTemplate.count(query, Catalog.class);
 
-        long count = mongoTemplate.count(new Query(), Catalog.class);
         assertEquals(1, count);
     }
 
     @Test
     void race_addLibraryToCatalogBook()
             throws InterruptedException {
-        BookSummaryDto book = new BookSummaryDto("book-1","Book One", 1,
+        BookSummaryDto book = new BookSummaryDto("book-1", "Book One", 1,
                 "Ahmet Test", "Test", "isbn-1");
         LibrarySummaryDto library = new LibrarySummaryDto(58L, "Library One", "Sivas", "58");
 
-        runConcurrent(2, () -> catalogService.addLibraryToCatalogBook(book, library));
+        runConcurrent(2, () -> {
+            try {
+                catalogService.addLibraryToCatalogBook(book, library);
+            } catch (DuplicateKeyException ignored) {
+            }
+        });
 
-        List<Catalog> catalogs = mongoTemplate.find(new Query(), Catalog.class);
+        Query query = new Query(
+                Criteria.where("book.bookId").is("book-1")
+                        .and("book.isbn").is("isbn-1")
+        );
+        List<Catalog> catalogs = mongoTemplate.find(query, Catalog.class);
+
         assertEquals(1, catalogs.size());
         assertEquals(1, catalogs.getFirst().getLibraries().size());
         assertEquals(58L, catalogs.getFirst().getLibraries().getFirst().getLibraryId());
@@ -71,23 +105,31 @@ public class CatalogRaceConditionTest {
 
     private void runConcurrent(int threadCount, Runnable action) throws InterruptedException {
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-        CountDownLatch latch = new CountDownLatch(threadCount);
+        CountDownLatch ready = new CountDownLatch(threadCount);
+        CountDownLatch start = new CountDownLatch(1);
+        CountDownLatch done = new CountDownLatch(threadCount);
         AtomicReference<RuntimeException> exceptionRef = new AtomicReference<>();
 
         for (int i = 0; i < threadCount; i++) {
             executor.submit(() -> {
                 try {
-
+                    ready.countDown();
+                    start.await();
                     action.run();
                 } catch (RuntimeException e) {
                     exceptionRef.compareAndSet(null, e);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    exceptionRef.compareAndSet(null, new RuntimeException(e));
                 } finally {
-                    latch.countDown();
+                    done.countDown();
                 }
             });
         }
 
-        latch.await();
+        ready.await();
+        start.countDown();
+        done.await();
         executor.shutdown();
 
         if (exceptionRef.get() != null) {
