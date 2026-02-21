@@ -28,10 +28,7 @@ jobs:
           cache: maven
 
       - name: Run unit checks only
-      # -DskipITs: Integration test fazını (Failsafe) atlar.
-      # -Dtest: 'integration' paketi altındaki sınıfları çalıştırmaz.
-      # Böylece Kafka, ES veya Mongo bağlantısı gerektiren testler koşturulmaz.
-        run: mvn -B -ntp clean verify -DskipITs -Dtest=!com.biglibon.*.integration.*
+        run: mvn -B -ntp clean verify -DskipITs -Dsurefire.excludes='**/integration/**' -Dsurefire.failIfNoSpecifiedTests=false
 
   docker:
     name: Build and Push Images (GHCR + Docker Hub)
