@@ -23,7 +23,7 @@ public class CatalogDomainService {
     @TrackPerformanceMetric
     public Catalog createOrUpdateCatalog(BookSummaryDto bookSummaryDto) {
         Catalog catalog = repository
-                .findByBookBookIdOrBookIsbn(
+                .findByBookBookIdAndBookIsbn(
                         bookSummaryDto.getBookId(),
                         bookSummaryDto.getIsbn()
                 )
@@ -46,7 +46,7 @@ public class CatalogDomainService {
                                            LibrarySummaryDto librarySummaryDto) {
 
         Catalog catalog = repository
-                .findByBookBookIdOrBookIsbn(
+                .findByBookBookIdAndBookIsbn(
                         bookSummaryDto.getBookId(),
                         bookSummaryDto.getIsbn()
                 )

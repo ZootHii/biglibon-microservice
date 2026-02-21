@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface CatalogMongoRepository extends MongoRepository<Catalog, String> {
 
-    Optional<Catalog> findByBookBookIdOrBookIsbn(String bookId, String isbn);
+    Optional<Catalog> findByBookBookIdAndBookIsbn(String bookId, String isbn);
 }
