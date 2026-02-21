@@ -7,6 +7,9 @@ spring:
       database: ${SPRING_DATA_MONGODB_DATABASE:biglibon}
       username: ${SPRING_DATA_MONGODB_USERNAME:biglibon}
       password: ${SPRING_DATA_MONGODB_PASSWORD:biglibon}
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka-4:9092,kafka-5:9092,kafka-6:9092,kafka-7:9092}
     properties:

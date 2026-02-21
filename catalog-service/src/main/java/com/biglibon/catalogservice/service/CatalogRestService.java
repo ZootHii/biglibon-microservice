@@ -6,11 +6,14 @@ import com.biglibon.catalogservice.model.CatalogIndex;
 import com.biglibon.catalogservice.repository.CatalogMongoRepository;
 import com.biglibon.sharedlibrary.dto.CatalogDto;
 import com.biglibon.sharedlibrary.performance.TrackPerformanceMetric;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
 
+@Slf4j
 @Service
 public class CatalogRestService {
 
@@ -25,12 +28,24 @@ public class CatalogRestService {
     }
 
     @TrackPerformanceMetric
+    @Cacheable(
+            value = "catalog-mongo-cache",   // özel tanım yapmadığın herhangi bir isim
+            key = "'all'",
+            unless = "#result == null || #result.isEmpty()"
+    )
     public List<CatalogDto> findAll() {
+        log.info("Cache MISS - CatalogRestService - findAll");
         return catalogMapper.toDtoList(catalogMongoRepository.findAll());
     }
 
     @TrackPerformanceMetric
+    @Cacheable(
+            value = "catalog-elasticsearch-cache",   // özel tanım yapmadığın herhangi bir isim
+            key = "'all'",
+            unless = "#result == null || #result.isEmpty()"
+    )
     public Iterable<CatalogIndex> findAllCatalogIndex() {
+        log.info("Cache MISS - CatalogRestService - findAllCatalogIndex");
         return catalogSearchService.findAll();
     }
 

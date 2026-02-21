@@ -12,6 +12,7 @@ import com.biglibon.sharedlibrary.dto.LibraryDto;
 import com.biglibon.libraryservice.repository.LibraryRepository;
 import com.biglibon.sharedlibrary.dto.BookDto;
 import com.biglibon.sharedlibrary.exception.BookNotFoundException;
+import com.biglibon.sharedlibrary.exception.LibraryDuplicateException;
 import com.biglibon.sharedlibrary.exception.LibraryNotFoundException;
 import com.biglibon.sharedlibrary.performance.TrackPerformanceMetric;
 import com.biglibon.sharedlibrary.producer.KafkaEventProducer;
@@ -43,9 +44,11 @@ public class LibraryService {
     @TrackPerformanceMetric
     @Transactional
     public LibraryDto createLibrary(CreateLibraryRequest request) {
-        Library library = libraryMapper.toEntityFromCreateLibraryRequest(request);
+        if (repository.existsByNameAndCityAndPhone(request.getName(), request.getCity(), request.getPhone())) {
+            throw new LibraryDuplicateException(request.toString());
+        }
 
-        // check library exists / later
+        Library library = libraryMapper.toEntityFromCreateLibraryRequest(request);
 
         List<String> requestedIsbns = Optional.ofNullable(request.getBookIsbns()).orElse(List.of());
         List<BookDto> validBookDtos = new ArrayList<>();
@@ -57,6 +60,7 @@ public class LibraryService {
         }
 
         Library savedLibrary = repository.save(library);
+
         LibraryDto libraryDto = new LibraryDto(savedLibrary.getId(),
                 savedLibrary.getName(),
                 savedLibrary.getCity(),

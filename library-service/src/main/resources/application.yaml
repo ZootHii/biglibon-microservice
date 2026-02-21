@@ -7,6 +7,9 @@ spring:
   cloud:
     client:
       hostname: library-service
+  data:
+    redis:
+      timeout: 2s
   jpa:
     #    show-sql: true
     hibernate:

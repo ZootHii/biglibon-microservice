@@ -24,6 +24,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(exceptionDetails, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(LibraryDuplicateException.class)
+    public ResponseEntity<?> handle(LibraryDuplicateException exception, HttpServletRequest request) {
+        ExceptionDetails exceptionDetails = new ExceptionDetails(
+                Instant.now().toString(),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(exceptionDetails, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(BookNotFoundException.class)
     public ResponseEntity<?> handle(BookNotFoundException exception, HttpServletRequest request) {
         ExceptionDetails exceptionDetails = new ExceptionDetails(

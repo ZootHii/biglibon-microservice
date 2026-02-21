@@ -12,6 +12,8 @@ spring:
     mongodb:
       authentication-database: admin
       auto-index-creation: true # neye yarıyor bakılacak
+    redis:
+      timeout: 2s
   jpa:
 #    show-sql: true
   kafka:

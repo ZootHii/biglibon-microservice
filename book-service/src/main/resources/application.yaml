@@ -11,6 +11,8 @@ spring:
     mongodb:
       authentication-database: admin
       auto-index-creation: true # creates defined indexes
+    redis:
+      timeout: 2s
   jpa:
     enabled: false
   #    show-sql: true

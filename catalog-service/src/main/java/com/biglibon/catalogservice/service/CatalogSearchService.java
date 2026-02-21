@@ -77,11 +77,11 @@ public class CatalogSearchService {
 
 
     public CatalogIndex saveCatalogIndex(Catalog catalog) {
-        log.info("saveCatalogIndex Catalog: {}", catalog);
         CatalogIndex catalogIndex = mapper.catalogToIndex(catalog);
-        log.info("saveCatalogIndex CatalogIndex: {}", catalogIndex);
         return repository.save(catalogIndex);
     }
+
+
 
     public void saveCatalogIndices(List<Catalog> catalogs) {
         List<CatalogIndex> catalogIndices = mapper.catalogToIndexList(catalogs);
