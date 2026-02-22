@@ -159,7 +159,7 @@ it will take some time XD
 
 - **Build Project (we skip contextLoad test runs unit test)**
     ```bash
-  mvn clean package
+  mvn clean package -DskipITs -Dsurefire.excludes='**/integration/**' -Dsurefire.failIfNoSpecifiedTests=false 
     ```
 
 - **Run All Services on Docker**
