@@ -72,7 +72,7 @@ public class ElasticsearchConfig {
             sslContext = SSLContext.getInstance("TLS");
             sslContext.init(null, tmf.getTrustManagers(), null);
         } catch (Exception e) {
-            throw new IllegalStateException("SSL sertifikası yüklenemedi", e);
+            throw new IllegalStateException("SSL Certificate cannot read.", e);
         }
     }
 

@@ -202,8 +202,8 @@ services:
   catalog-service:
     image: 'biglibon-microservice-catalog-service:latest'
     build:
-      context: .
-      dockerfile: catalog-service/Dockerfile
+      context: ./catalog-service
+      dockerfile: Dockerfile
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}

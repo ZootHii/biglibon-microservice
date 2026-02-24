@@ -21,6 +21,6 @@ public class CatalogServiceApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        catalogDataService.setData();
+//        catalogDataService.setData();
     }
 }
