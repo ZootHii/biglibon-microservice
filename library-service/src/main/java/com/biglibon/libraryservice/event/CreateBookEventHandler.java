@@ -44,6 +44,8 @@ public class CreateBookEventHandler implements KafkaEventHandler {
 
         } catch (Exception e) {
             log.error("Failed to process event: {}, exception: {}", KafkaConstants.Book.CREATE_BOOK_EVENT, e.getMessage(), e);
+            // Handler hatasını saklamıyoruz ki listener retry mekanizmasına bırakabilsin.
+            throw new IllegalStateException("Create book event could not be processed.", e);
         }
     }
 }

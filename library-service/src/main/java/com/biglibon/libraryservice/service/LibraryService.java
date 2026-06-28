@@ -40,7 +40,7 @@ public class LibraryService {
         this.kafkaEventProducer = kafkaEventProducer;
     }
 
-    // OUTBOX pattern gerekir
+    // İdeal çözüm outbox pattern; şimdilik Kafka hatasını gizlemiyoruz.
     @TrackPerformanceMetric
     @Transactional
     public LibraryDto createLibrary(CreateLibraryRequest request) {
@@ -77,7 +77,7 @@ public class LibraryService {
             return;
         }
 
-        kafkaEventProducer.send(new KafkaEvent<>(
+        kafkaEventProducer.sendAndWait(new KafkaEvent<>(
                 KafkaConstants.Library.TOPIC,
                 KafkaConstants.Library.ADD_BOOK_TO_LIBRARY_EVENT,
                 KafkaConstants.Library.PRODUCER,
@@ -93,10 +93,8 @@ public class LibraryService {
                 .toList();
     }
 
-    //thread-safety / race condition
-    // outbox pattern gerekir
-    // optimistic lock entity içinde long version @Version
-    // hızlandırmak için library içinde belki id nin yanında isbnleri de tutabiliriz database de, denormalize
+    // Thread-safety için sonraki adım @Version ile optimistic lock kullanmak olabilir.
+    // Outbox pattern eklenirse DB commit ve Kafka publish aynı güvenilir akışa bağlanır.
     @Transactional
     @TrackPerformanceMetric
     public LibraryDto addBooksToLibraryByIsbns(AddBooksToLibraryByIsbnsRequest request) {
@@ -112,7 +110,7 @@ public class LibraryService {
         List<BookDto> validBooks = getValidBooksByBookIsbns(requestedIsbns);
 
         // hash used for better performance for lookup O(1)
-        Set<String> existingBookIds = new HashSet<>(library.getBookIds());
+        Set<String> existingBookIds = new HashSet<>(safeBookIds(library));
 
         // list of valid book ids
         List<String> validBookIds = validBooks.stream()
@@ -122,7 +120,7 @@ public class LibraryService {
         // Only add bookIds not already present
         validBookIds.stream()
                 .filter(existingBookIds::add)  // add returns false if element already exists > filter removes duplicates
-                .forEach(library.getBookIds()::add);
+                .forEach(safeBookIds(library)::add);
 
         Library updatedLibrary = repository.save(library);
 
@@ -130,7 +128,7 @@ public class LibraryService {
         LibraryDto libraryDto = replaceBookIdsWithBooks(updatedLibrary);
 
         // send kafka event
-        kafkaEventProducer.send(new KafkaEvent<>(
+        kafkaEventProducer.sendAndWait(new KafkaEvent<>(
                 KafkaConstants.Library.TOPIC,
                 KafkaConstants.Library.ADD_BOOK_TO_LIBRARY_EVENT,
                 KafkaConstants.Library.PRODUCER,
@@ -145,9 +143,10 @@ public class LibraryService {
     }
 
     private List<BookDto> getValidBooksByBookIsbns(List<String> bookIsbns) {
-        List<BookDto> validBooks = bookServiceClient.getAllByIsbns(bookIsbns).getBody();
+        List<BookDto> validBooks = Optional.ofNullable(bookServiceClient.getAllByIsbns(bookIsbns).getBody())
+                .orElse(List.of());
 
-        Set<String> validBookIsbnSet = Objects.requireNonNull(validBooks).stream()
+        Set<String> validBookIsbnSet = validBooks.stream()
                 .map(BookDto::isbn)
                 .collect(Collectors.toSet());
 
@@ -171,7 +170,8 @@ public class LibraryService {
     public LibraryDto replaceBookIdsWithBooks(Library library) {
         LibraryDto libraryDto = libraryMapper.toDto(library);
 
-        List<BookDto> books = bookServiceClient.getAllByIds(library.getBookIds()).getBody();
+        List<BookDto> books = Optional.ofNullable(bookServiceClient.getAllByIds(safeBookIds(library)).getBody())
+                .orElse(List.of());
 
         libraryDto.setBooks(books);
         return libraryDto;
@@ -194,12 +194,12 @@ public class LibraryService {
         }
 
         // hash used for better performance for lookup O(1)
-        Set<String> existingBookIds = new HashSet<>(library.getBookIds());
+        Set<String> existingBookIds = new HashSet<>(safeBookIds(library));
 
         // Only add bookIds not already present
         requestedBookIds.stream()
                 .filter(existingBookIds::add)  // add returns false if element already exists > filter removes duplicates
-                .forEach(library.getBookIds()::add);
+                .forEach(safeBookIds(library)::add);
 
         Library updatedLibrary = repository.save(library);
 
@@ -207,7 +207,7 @@ public class LibraryService {
         LibraryDto libraryDto = replaceBookIdsWithBooks(updatedLibrary);
 
         // send kafka event
-        kafkaEventProducer.send(new KafkaEvent<>(
+        kafkaEventProducer.sendAndWait(new KafkaEvent<>(
                 KafkaConstants.Library.TOPIC,
                 KafkaConstants.Library.ADD_BOOK_TO_LIBRARY_EVENT,
                 KafkaConstants.Library.PRODUCER,
@@ -224,5 +224,13 @@ public class LibraryService {
     // TESTING
     public BookDto getBookByIdFromLibraryService(String id) {
         return bookServiceClient.getById(id).getBody();
+    }
+
+    private List<String> safeBookIds(Library library) {
+        if (library.getBookIds() == null) {
+            // Eski kayıtlar veya manuel test verisi null getirebilir, burada normalize ediyoruz.
+            library.setBookIds(new ArrayList<>());
+        }
+        return library.getBookIds();
     }
 }

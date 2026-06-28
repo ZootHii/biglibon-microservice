@@ -31,7 +31,7 @@ public class BookService {
         this.kafkaEventProducer = kafkaEventProducer;
     }
 
-    // maybe outbox pattern
+    // İdeal çözüm outbox pattern; burada en azından Kafka hatasını caller'a bildiriyoruz.
     @TrackPerformanceMetric
     public BookDto create(BookDto bookDto) {
         Book bookToSave = bookMapper.toEntity(bookDto);
@@ -41,7 +41,7 @@ public class BookService {
         Book bookSaved = repository.save(bookToSave);
         BookDto bookSavedDto = bookMapper.toDto(bookSaved);
 
-        kafkaEventProducer.send(new KafkaEvent<>(
+        kafkaEventProducer.sendAndWait(new KafkaEvent<>(
                 KafkaConstants.Book.TOPIC,
                 KafkaConstants.Book.CREATE_BOOK_EVENT,
                 KafkaConstants.Book.PRODUCER,

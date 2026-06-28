@@ -65,7 +65,7 @@ class BookServiceTest {
 
         assertThat(result).isEqualTo(savedDto);
         ArgumentCaptor<KafkaEvent<BookDto>> eventCaptor = ArgumentCaptor.forClass(KafkaEvent.class);
-        verify(kafkaEventProducer).send(eventCaptor.capture());
+        verify(kafkaEventProducer).sendAndWait(eventCaptor.capture());
         KafkaEvent<BookDto> event = eventCaptor.getValue();
         assertThat(event.getTopic()).isEqualTo(KafkaConstants.Book.TOPIC);
         assertThat(event.getEvent()).isEqualTo(KafkaConstants.Book.CREATE_BOOK_EVENT);
@@ -85,7 +85,7 @@ class BookServiceTest {
                 .hasMessageContaining("isbn-1");
 
         verify(repository, never()).save(any());
-        verify(kafkaEventProducer, never()).send(any());
+        verify(kafkaEventProducer, never()).sendAndWait(any());
     }
 
     @Test

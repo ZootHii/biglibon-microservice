@@ -51,7 +51,7 @@ public class BookDataService {
         List<Book> books = List.of(book1, book2, book3, book4);
         log.info("Saved Books: {}", repository.saveAll(books));
         books.forEach(book -> {
-            kafkaEventProducer.send(new KafkaEvent<>(
+            kafkaEventProducer.sendAndWait(new KafkaEvent<>(
                     KafkaConstants.Book.TOPIC,
                     KafkaConstants.Book.CREATE_BOOK_EVENT,
                     KafkaConstants.Book.PRODUCER,
@@ -103,7 +103,7 @@ public class BookDataService {
                         Book bookSaved = repository.save(book);
                         BookDto bookSavedDto = bookMapper.toDto(bookSaved);
 
-                        kafkaEventProducer.send(new KafkaEvent<>(
+                        kafkaEventProducer.sendAndWait(new KafkaEvent<>(
                                 KafkaConstants.Book.TOPIC,
                                 KafkaConstants.Book.CREATE_BOOK_EVENT,
                                 KafkaConstants.Book.PRODUCER,

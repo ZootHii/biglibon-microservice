@@ -40,7 +40,8 @@ public class LibraryKafkaConsumer {
 
         } catch (Exception e) {
             log.error("Kafka message processing failed: {}", e.getMessage(), e);
+            // Hata yutulursa Kafka mesajı işlenmiş sayılabilir; retry/DLT için exception dışarı çıkmalı.
+            throw new IllegalStateException("Kafka message processing failed.", e);
         }
     }
 }
-

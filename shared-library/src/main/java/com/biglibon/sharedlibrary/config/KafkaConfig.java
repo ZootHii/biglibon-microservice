@@ -6,10 +6,17 @@ import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
+import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.util.backoff.FixedBackOff;
 
 @Slf4j
 @Configuration
 public class KafkaConfig {
+
+    private static final long RETRY_INTERVAL_MS = 1_000L;
+    private static final long RETRY_COUNT = 3L;
 
     @Bean
     public NewTopic bookEventsTopic() {
@@ -28,6 +35,27 @@ public class KafkaConfig {
                 .replicas(4)
                 .build();
     }
+
+    @Bean
+    public DefaultErrorHandler kafkaErrorHandler(KafkaTemplate<String, String> kafkaTemplate) {
+        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate);
+        // Consumer exception fırlatırsa Kafka önce retry dener, sonra mesajı *.DLT topic'ine taşır.
+        return new DefaultErrorHandler(recoverer, new FixedBackOff(RETRY_INTERVAL_MS, RETRY_COUNT));
+    }
+
+    @Bean
+    public NewTopic bookEventsDltTopic() {
+        return TopicBuilder.name(KafkaConstants.Book.TOPIC + ".DLT")
+                .partitions(2)
+                .replicas(4)
+                .build();
+    }
+
+    @Bean
+    public NewTopic libraryEventsDltTopic() {
+        return TopicBuilder.name(KafkaConstants.Library.TOPIC + ".DLT")
+                .partitions(2)
+                .replicas(4)
+                .build();
+    }
 }
-
-

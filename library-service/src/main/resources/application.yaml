@@ -65,3 +65,7 @@ management:
           - "*" # localhost:8888/library-service/actuator/health
 
 spring.cloud.service-registry.auto-registration.enabled: true
+
+biglibon:
+  seed:
+    enabled: ${BIGLIBON_SEED_ENABLED:false} # true yaparsan örnek library datası oluşturulur.

@@ -119,7 +119,8 @@
         retries: 120
       depends_on:
         elastic-setup:
-          condition: service_healthy
+          # elastic-setup tek seferlik sertifika/password hazırlama job'ıdır; başarılı bitmesi yeterlidir.
+          condition: service_completed_successfully
 
     elastic-2:
       image: elasticsearch:9.0.2

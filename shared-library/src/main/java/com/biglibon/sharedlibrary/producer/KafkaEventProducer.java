@@ -1,6 +1,7 @@
 package com.biglibon.sharedlibrary.producer;
 
 import com.biglibon.sharedlibrary.consumer.KafkaEvent;
+import com.biglibon.sharedlibrary.exception.KafkaEventPublishException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -44,6 +45,26 @@ public class KafkaEventProducer {
             });
         } catch (Exception e) {
             log.error("KafkaEventProducer: Failed to serialize event", e);
+            throw new KafkaEventPublishException("Kafka event could not be serialized.", e);
+        }
+    }
+
+    public <T> void sendAndWait(KafkaEvent<T> kafkaEvent) {
+        try {
+            String kafkaEventJson = objectMapper.writeValueAsString(kafkaEvent);
+            // Outbox yokken en azından producer hatasını caller'a bildiriyoruz.
+            SendResult<String, String> result = kafkaTemplate.send(kafkaEvent.getTopic(), kafkaEventJson).get();
+            log.info("KafkaEventProducer: KafkaEvent published; " +
+                            "payload={}, topic={}, event={}, producer={}, partition={}, offset={}",
+                    kafkaEventJson,
+                    result.getRecordMetadata().topic(),
+                    kafkaEvent.getEvent(),
+                    kafkaEvent.getProducer(),
+                    result.getRecordMetadata().partition(),
+                    result.getRecordMetadata().offset());
+        } catch (Exception e) {
+            log.error("KafkaEventProducer: Failed to publish event", e);
+            throw new KafkaEventPublishException("Kafka event could not be published.", e);
         }
     }
 }

@@ -8,6 +8,8 @@ import com.biglibon.sharedlibrary.constant.KafkaConstants;
 import com.biglibon.sharedlibrary.consumer.KafkaEvent;
 import com.biglibon.sharedlibrary.dto.BookDto;
 import com.biglibon.sharedlibrary.producer.KafkaEventProducer;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,6 +17,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 import java.util.List;
 
+@Slf4j
 @EnableFeignClients(clients = BookServiceClient.class)
 @SpringBootApplication(scanBasePackages = {"com.biglibon.libraryservice", "com.biglibon.sharedlibrary"})
 public class LibraryServiceApplication implements CommandLineRunner {
@@ -23,13 +26,16 @@ public class LibraryServiceApplication implements CommandLineRunner {
     private final BookServiceClient bookServiceClient;
     private final KafkaEventProducer kafkaEventProducer;
     private final LibraryService libraryService;
+    private final boolean seedEnabled;
 
     public LibraryServiceApplication(LibraryRepository libraryRepository, BookServiceClient bookServiceClient,
-                                     KafkaEventProducer kafkaEventProducer, LibraryService libraryService) {
+                                     KafkaEventProducer kafkaEventProducer, LibraryService libraryService,
+                                     @Value("${biglibon.seed.enabled:false}") boolean seedEnabled) {
         this.libraryRepository = libraryRepository;
         this.bookServiceClient = bookServiceClient;
         this.kafkaEventProducer = kafkaEventProducer;
         this.libraryService = libraryService;
+        this.seedEnabled = seedEnabled;
     }
 
     public static void main(String[] args) {
@@ -38,6 +44,11 @@ public class LibraryServiceApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws InterruptedException {
+        if (!seedEnabled) {
+            // Seed varsayılan kapalı; servis startup'ı book-service hazır olana kadar bloklanmasın.
+            log.info("Library seed disabled. Set biglibon.seed.enabled=true to create sample data.");
+            return;
+        }
         initialize();
     }
 
@@ -58,7 +69,7 @@ public class LibraryServiceApplication implements CommandLineRunner {
             List<Library> libraries = List.of(library1, library2);
             System.out.println("Saved Libraries: " + libraryRepository.saveAll(libraries));
 
-            kafkaEventProducer.send(new KafkaEvent<>(
+            kafkaEventProducer.sendAndWait(new KafkaEvent<>(
                     KafkaConstants.Library.TOPIC,
                     KafkaConstants.Library.ADD_BOOK_TO_LIBRARY_EVENT,
                     KafkaConstants.Library.PRODUCER,

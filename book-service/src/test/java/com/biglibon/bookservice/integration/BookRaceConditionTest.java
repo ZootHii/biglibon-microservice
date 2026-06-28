@@ -82,7 +82,7 @@ class BookRaceConditionTest {
         Query query = new Query(Criteria.where("isbn").is("race-isbn-1"));
         long count = mongoTemplate.count(query, Book.class);
         assertEquals(1, count);
-        verify(kafkaEventProducer, atMost(1)).send(any());
+        verify(kafkaEventProducer, atMost(1)).sendAndWait(any());
     }
 
     private void runConcurrent(int threadCount, Runnable action) throws InterruptedException {

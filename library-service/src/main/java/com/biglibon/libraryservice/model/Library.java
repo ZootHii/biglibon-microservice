@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,7 +28,7 @@ public class Library {
     private String phone;
 
     @ElementCollection
-    private List<String> bookIds;
+    private List<String> bookIds = new ArrayList<>();
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -41,12 +42,15 @@ public class Library {
         this.name = name;
         this.city = city;
         this.phone = phone;
+        // Library kitapsız oluşturulabilir, bu yüzden listeyi null bırakmıyoruz.
+        this.bookIds = new ArrayList<>();
     }
 
     public Library(String name, String city, String phone, List<String> bookIds) {
         this.name = name;
         this.city = city;
         this.phone = phone;
-        this.bookIds = bookIds;
+        // Servis katmanında NPE yaşamamak için dışarıdan null gelse bile boş listeye çeviriyoruz.
+        this.bookIds = bookIds == null ? new ArrayList<>() : bookIds;
     }
 }

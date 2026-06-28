@@ -74,6 +74,8 @@ public class AddBookToLibraryEventHandler implements KafkaEventHandler {
         } catch (Exception e) {
             log.error("Failed to process event: {}, exception: {}",
                     KafkaConstants.Library.ADD_BOOK_TO_LIBRARY_EVENT, e.getMessage(), e);
+            // Handler hatasını saklamıyoruz ki listener retry mekanizmasına bırakabilsin.
+            throw new IllegalStateException("Add book to library event could not be processed.", e);
         }
     }
 

@@ -79,7 +79,7 @@ class LibraryServiceTest {
         assertThat(libraryCaptor.getValue().getBookIds()).containsExactly("book-1", "book-2");
 
         ArgumentCaptor<KafkaEvent<LibraryDto>> eventCaptor = ArgumentCaptor.forClass(KafkaEvent.class);
-        verify(kafkaEventProducer).send(eventCaptor.capture());
+        verify(kafkaEventProducer).sendAndWait(eventCaptor.capture());
         KafkaEvent<LibraryDto> event = eventCaptor.getValue();
         assertThat(event.getTopic()).isEqualTo(KafkaConstants.Library.TOPIC);
         assertThat(event.getEvent()).isEqualTo(KafkaConstants.Library.ADD_BOOK_TO_LIBRARY_EVENT);
@@ -106,7 +106,7 @@ class LibraryServiceTest {
 
         assertThat(result.getBooks()).isEmpty();
         verifyNoInteractions(bookServiceClient);
-        verify(kafkaEventProducer, never()).send(any());
+        verify(kafkaEventProducer, never()).sendAndWait(any());
     }
 
     @Test
@@ -145,7 +145,7 @@ class LibraryServiceTest {
         assertThat(libraryCaptor.getValue().getBookIds()).containsExactly("book-1", "book-2", "book-3");
 
         ArgumentCaptor<KafkaEvent<LibraryDto>> eventCaptor = ArgumentCaptor.forClass(KafkaEvent.class);
-        verify(kafkaEventProducer).send(eventCaptor.capture());
+        verify(kafkaEventProducer).sendAndWait(eventCaptor.capture());
         KafkaEvent<LibraryDto> event = eventCaptor.getValue();
         assertThat(event.getTopic()).isEqualTo(KafkaConstants.Library.TOPIC);
         assertThat(event.getEvent()).isEqualTo(KafkaConstants.Library.ADD_BOOK_TO_LIBRARY_EVENT);
@@ -164,5 +164,30 @@ class LibraryServiceTest {
                 .hasMessageContaining("There are no ISBNs.");
         verifyNoInteractions(bookServiceClient);
         verifyNoInteractions(kafkaEventProducer);
+    }
+
+    @Test
+    void addBooksToLibraryByIsbns_whenExistingBookIdsNull_initializesBookIds() {
+        Library library = new Library("Sivas Merkez Kütüphane", "Ankara", "(0346) 221 11 12");
+        library.setId(6L);
+        library.setBookIds(null);
+
+        Instant now = Instant.parse("2026-02-04T10:04:42.525821Z");
+        BookDto book = new BookDto("book-2", "Book Two", 2021, "Author Two", "Publisher Two", "isbn-2", now, now);
+        Library updatedLibrary = new Library("Sivas Merkez Kütüphane", "Ankara", "(0346) 221 11 12", List.of("book-2"));
+        updatedLibrary.setId(6L);
+        LibraryDto libraryDto = new LibraryDto(6L, "Sivas Merkez Kütüphane", "Ankara", "(0346) 221 11 12", null);
+
+        when(repository.findById(6L)).thenReturn(Optional.of(library));
+        when(bookServiceClient.getAllByIsbns(List.of("isbn-2"))).thenReturn(ResponseEntity.ok(List.of(book)));
+        when(repository.save(library)).thenReturn(updatedLibrary);
+        when(libraryMapper.toDto(updatedLibrary)).thenReturn(libraryDto);
+        when(bookServiceClient.getAllByIds(List.of("book-2"))).thenReturn(ResponseEntity.ok(List.of(book)));
+
+        LibraryDto result = libraryService.addBooksToLibraryByIsbns(new AddBooksToLibraryByIsbnsRequest(6L, List.of("isbn-2")));
+
+        assertThat(result.getBooks()).containsExactly(book);
+        assertThat(library.getBookIds()).containsExactly("book-2");
+        verify(kafkaEventProducer).sendAndWait(any());
     }
 }
